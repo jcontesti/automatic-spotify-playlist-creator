@@ -1,0 +1,9 @@
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+SPOTIPY_CLIENT_ID = os.environ.get("SPOTIPY_CLIENT_ID")
+SPOTIPY_CLIENT_SECRET = os.environ.get("SPOTIPY_CLIENT_SECRET")
+SPOTIPY_REDIRECT_URI = os.environ.get("SPOTIPY_REDIRECT_URI")
+SPOTIFY_USERNAME=os.environ.get("SPOTIFY_USERNAME")
+SPOTIFY_PLAYLIST=os.environ.get("SPOTIFY_PLAYLIST")
