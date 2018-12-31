@@ -9,6 +9,7 @@ import settings
 ARTISTS_NAMES_TRANSFORMATIONS = {
     '480 east': 'four80east',
     'agape soul': 'darryl anders agapesoul',
+    'christian grey': 'christon gray',
     'india arie': 'india.arie',
     'vivian sessions': 'vivian sessoms',
 }
@@ -40,7 +41,7 @@ def process_song(artist, track_name, album):
     else:
         artists_names = [artist]
 
-    track_name = track_name.replace('etc', '')
+    track_name = track_name.replace('etc', '').replace("'", '')
 
     for split in SONGS_NAMES_SPLIT:
         track_name = track_name.replace(split, '#')
