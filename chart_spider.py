@@ -8,7 +8,7 @@ class ChartSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        chart_link = response.xpath('//a[contains(@href, "playlists/sweet-rhythms-chart")]/@href').extract_first()
+        chart_link = response.xpath('//a[contains(@href, "playlists/copy")]/@href').extract_first()
         yield response.follow(chart_link, callback=self.parse_chart)
 
     def parse_chart(self, response):
