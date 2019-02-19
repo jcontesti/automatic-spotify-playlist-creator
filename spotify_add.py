@@ -116,7 +116,7 @@ def get_tracks_to_load(sp):
         for artist_name in artists_names:
 
             for track_name in tracks_names:
-                if track_name in VARIOUS_TRACKS:
+                if track_name in VARIOUS_TRACKS and album is not None:
                     # We will try to collect the most interesting tracks
                     # of the album. Spotify doesn't allow to know the
                     # number of plays per album, but we'll use a work-around:
