@@ -3,7 +3,13 @@ import json
 import spotipy
 import spotipy.util as util
 
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
+
 import settings
+from track import Track
+from playlist import Playlist
+from album import Album
 
 # Manual transformations of misspellings
 ARTISTS_NAMES_TRANSFORMATIONS = {
@@ -32,7 +38,7 @@ def get_chart():
     return chart
 
 
-def process_song(artist, track_name, album):
+def format_song(artist, track_name, album):
     for split in ARTISTS_NAMES_SPLIT:
         artist = artist.replace(split, '#')
 
@@ -72,14 +78,13 @@ def process_song(artist, track_name, album):
 def get_playlist_current_tracks(sp):
     current_tracks = []
 
-    current_playlist_tracks = sp.user_playlist_tracks(
-        settings.SPOTIFY_USERNAME,
-        playlist_id=settings.SPOTIFY_PLAYLIST)
+    current_playlist_tracks = Playlist(
+        sp.user_playlist_tracks(
+            settings.SPOTIFY_USERNAME,
+            playlist_id=settings.SPOTIFY_PLAYLIST)
+    )
 
-    for current_track in current_playlist_tracks['items']:
-        current_tracks.append(current_track['track']['id'])
-
-    return current_tracks
+    return current_playlist_tracks.tracks_ids
 
 
 def remove_deleted_tracks(current_tracks, sp, tracks_to_load):
@@ -104,19 +109,39 @@ def add_new_tracks(current_tracks, sp, tracks_to_load):
             )
 
 
-def get_tracks_to_load(sp):
+def is_release_date_in_last_year(track):
+    if track.empty():
+        return False
+    else:
+        release_date = track.album.release_date
+        release_date_precision = track.album.release_date_precision
+        release_date_formatted = datetime.today()
+
+        if release_date_precision == 'year':
+            release_date_formatted = datetime.strptime(release_date, '%Y')
+        if release_date_precision == 'month':
+            release_date_formatted = datetime.strptime(release_date, '%Y-%m')
+        if release_date_precision == 'day':
+            release_date_formatted = datetime.strptime(
+                release_date, '%Y-%m-%d'
+            )
+
+        return release_date_formatted > datetime.now() - relativedelta(years=1)
+
+def get_current_tracks_to_load(sp):
     tracks_to_load = []
 
     for song in get_chart():
 
-        artists_names, tracks_names, album = process_song(song['artist'],
-                                                          song['title'],
-                                                          song['album'])
+        artists_names, tracks_names, album_name = format_song(song['artist'],
+                                                              song['title'],
+                                                              song['album'])
 
         for artist_name in artists_names:
 
             for track_name in tracks_names:
-                if track_name in VARIOUS_TRACKS and album is not None:
+
+                if track_name in VARIOUS_TRACKS and album_name is not None:
                     # We will try to collect the most interesting tracks
                     # of the album. Spotify doesn't allow to know the
                     # number of plays per album, but we'll use a work-around:
@@ -124,30 +149,23 @@ def get_tracks_to_load(sp):
                     # the artist, we'll add it to the playlist
 
                     q = 'artist:"' + artist_name + \
-                        '" album:"' + album + '"'
+                        '" album:"' + album_name + '"'
 
                     print(q)
 
-                    results = sp.search(q=q, type='album', limit=1)
+                    album = Album(sp.search(q=q, type='album', limit=1))
 
-                    if results['albums']['items']:
-                        album_id = results['albums']['items'][0]['id']
-                        artist_id = results['albums']['items'][0]['artists'][0]['id']
+                    if not album.empty():
+                        artist = album.main_artist
 
-                        album_tracks = sp.album_tracks(album_id)
-                        artist_top_tracks = sp.artist_top_tracks(artist_id,
-                                                                 country=COUNTRY)
+                        album_tracks_ids = album.tracks_ids(sp)
+                        artist_top_tracks_ids = artist.top_tracks_ids(
+                            sp,
+                            COUNTRY
+                        )
 
-                        album_tracks_id = []
-                        for album_track in album_tracks['items']:
-                            album_tracks_id.append(album_track['id'])
-
-                        artist_top_tracks_id = []
-                        for artist_top_track in artist_top_tracks['tracks']:
-                            artist_top_tracks_id.append(artist_top_track['id'])
-
-                        for album_track_id in album_tracks_id:
-                            if album_track_id in artist_top_tracks_id:
+                        for album_track_id in album_tracks_ids:
+                            if album_track_id in artist_top_tracks_ids:
                                 tracks_to_load.append(album_track_id)
 
                 else:
@@ -156,10 +174,10 @@ def get_tracks_to_load(sp):
 
                     print(q)
 
-                    results = sp.search(q=q, type='track', limit=1)
+                    track = Track(sp.search(q=q, type='track', limit=1))
 
-                    if results['tracks']['items']:
-                        tracks_to_load.append(results['tracks']['items'][0]['id'])
+                    if is_release_date_in_last_year(track):
+                        tracks_to_load.append(track.id)
 
     for track_to_load in tracks_to_load:
         if track_to_load in TRACKS_IDS_TO_IGNORE:
@@ -170,7 +188,7 @@ def get_tracks_to_load(sp):
 
 def update_playlist(sp):
 
-    tracks_to_load = get_tracks_to_load(sp)
+    tracks_to_load = get_current_tracks_to_load(sp)
 
     current_tracks = get_playlist_current_tracks(sp)
 
