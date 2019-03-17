@@ -1,15 +1,16 @@
 import json
+from datetime import datetime
 
 import spotipy
 import spotipy.util as util
-
-from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
 import settings
-from track import Track
-from playlist import Playlist
 from album import Album
+from playlist import Playlist
+from track import Track
+
+from misspelling_corrector import correct
 
 # Manual transformations of misspellings
 ARTISTS_NAMES_TRANSFORMATIONS = {
@@ -128,6 +129,9 @@ def is_release_date_in_last_year(track):
 
         return release_date_formatted > datetime.now() - relativedelta(years=1)
 
+def get_artist_track_query(artist_name, track_name):
+    return 'artist:"' + artist_name + '" track:"' + track_name + '"'
+
 def get_current_tracks_to_load(sp):
     tracks_to_load = []
 
@@ -169,12 +173,30 @@ def get_current_tracks_to_load(sp):
                                 tracks_to_load.append(album_track_id)
 
                 else:
-                    q = 'artist:"' + artist_name + \
-                        '" track:"' + track_name + '"'
+                    q = get_artist_track_query(artist_name, track_name)
 
                     print(q)
 
                     track = Track(sp.search(q=q, type='track', limit=1))
+
+                    # If not found, try with a corrected misspelling version
+                    if track.empty():
+                        corrected_values = correct(artist_name, track_name)
+                        if corrected_values is not None:
+                            q = get_artist_track_query(
+                                corrected_values['artist_name'],
+                                corrected_values['track_name']
+                            )
+
+                            print("(corrected) " + q)
+
+                            track = Track(
+                                sp.search(
+                                    q=q,
+                                    type='track',
+                                    limit=1
+                                )
+                            )
 
                     if is_release_date_in_last_year(track):
                         tracks_to_load.append(track.id)
