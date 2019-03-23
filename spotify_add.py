@@ -99,17 +99,6 @@ def remove_deleted_tracks(current_tracks, sp, tracks_to_load):
             )
 
 
-def add_new_tracks(current_tracks, sp, tracks_to_load):
-    for track_to_load in tracks_to_load:
-        if track_to_load not in current_tracks:
-            # Add the track
-            sp.user_playlist_add_tracks(
-                settings.SPOTIFY_USERNAME,
-                playlist_id=settings.SPOTIFY_PLAYLIST,
-                tracks=[track_to_load],
-            )
-
-
 def is_release_date_in_last_year(track):
     if track.empty():
         return False
@@ -129,11 +118,13 @@ def is_release_date_in_last_year(track):
 
         return release_date_formatted > datetime.now() - relativedelta(years=1)
 
+
 def get_artist_track_query(artist_name, track_name):
     return 'artist:"' + artist_name + '" track:"' + track_name + '"'
 
+
 def get_current_tracks_to_load(sp):
-    tracks_to_load = []
+    tracks_to_load = set()
 
     for song in get_chart():
 
@@ -170,7 +161,7 @@ def get_current_tracks_to_load(sp):
 
                         for album_track_id in album_tracks_ids:
                             if album_track_id in artist_top_tracks_ids:
-                                tracks_to_load.append(album_track_id)
+                                tracks_to_load.add(album_track_id)
 
                 else:
                     q = get_artist_track_query(artist_name, track_name)
@@ -199,13 +190,24 @@ def get_current_tracks_to_load(sp):
                             )
 
                     if is_release_date_in_last_year(track):
-                        tracks_to_load.append(track.id)
+                        tracks_to_load.add(track.id)
 
     for track_to_load in tracks_to_load:
         if track_to_load in TRACKS_IDS_TO_IGNORE:
             tracks_to_load.remove(track_to_load)
 
     return tracks_to_load
+
+
+def add_new_tracks(current_tracks, sp, tracks_to_load):
+    for track_to_load in tracks_to_load:
+        if track_to_load not in current_tracks:
+            # Add the track
+            sp.user_playlist_add_tracks(
+                settings.SPOTIFY_USERNAME,
+                playlist_id=settings.SPOTIFY_PLAYLIST,
+                tracks=[track_to_load],
+            )
 
 
 def update_playlist(sp):
