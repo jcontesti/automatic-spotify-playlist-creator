@@ -18,6 +18,7 @@ ARTISTS_NAMES_TRANSFORMATIONS = {
     'agape soul': 'darryl anders agapesoul',
     'christian grey': 'christon gray',
     'india arie': 'india.arie',
+    'o\'jays': 'the ojays',
     'vivian sessions': 'vivian sessoms',
 }
 
