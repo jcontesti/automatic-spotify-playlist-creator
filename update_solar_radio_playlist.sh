@@ -1,5 +1,5 @@
 #!/bin/bash
-cd /home/spotify-solar-radio-chart/
+cd /home/scrapy-to-spotify/
 source venv/bin/activate
 rm solar_radio.json
 scrapy runspider spider/solar_radio_spider.py -o solar_radio.json
