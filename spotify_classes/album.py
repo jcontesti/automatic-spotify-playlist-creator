@@ -1,6 +1,6 @@
-import artist
+from . import artist
 
-class Album():
+class Album:
     def __init__(self, album):
         self._album = album
 

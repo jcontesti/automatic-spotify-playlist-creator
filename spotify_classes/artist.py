@@ -1,7 +1,4 @@
-import track
-
-
-class Artist():
+class Artist:
     def __init__(self, artist):
         self._artist = artist
 

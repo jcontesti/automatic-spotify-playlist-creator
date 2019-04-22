@@ -1,4 +1,5 @@
 import json
+import sys
 from datetime import datetime
 
 import spotipy
@@ -6,11 +7,10 @@ import spotipy.util as util
 from dateutil.relativedelta import relativedelta
 
 import settings
-from album import Album
-from playlist import Playlist
-from track import Track
-
-from misspelling_corrector import correct
+from correctors.misspelling_corrector import correct
+from spotify_classes.album import Album
+from spotify_classes.playlist import Playlist
+from spotify_classes.track import Track
 
 # Manual transformations of misspellings
 ARTISTS_NAMES_TRANSFORMATIONS = {
@@ -26,7 +26,14 @@ ARTISTS_NAMES_TRANSFORMATIONS = {
 # Useful when we are loading the wrong track but the algorithm can't avoid it
 TRACKS_IDS_TO_IGNORE = ['7pDgsRaydwphT8FlnlzMZd']
 
-ARTISTS_NAMES_SPLIT = [' & ', ' ft ']
+ARTISTS_NAMES_SPLIT = [' & ',
+                       ' + ',
+                       ' ft ',
+                       ' feat ',
+                       ' feat. ',
+                       ' with ',
+                       ' and ',
+                       ]
 SONGS_NAMES_SPLIT = ['/']
 VARIOUS_TRACKS = ['various tracks', 'various songs']
 COUNTRY = 'GB'
@@ -34,8 +41,8 @@ COUNTRY = 'GB'
 SCOPE = 'playlist-modify-public'
 
 
-def get_chart():
-    with open('chart.json') as f:
+def get_chart(scrapped_songs):
+    with open(scrapped_songs) as f:
         chart = json.load(f)
     return chart
 
@@ -77,25 +84,24 @@ def format_song(artist, track_name, album):
     return artists_names_transformed, tracks_names, album
 
 
-def get_playlist_current_tracks(sp):
-    current_tracks = []
+def get_playlist_current_tracks(sp, playlist_id):
 
     current_playlist_tracks = Playlist(
         sp.user_playlist_tracks(
             settings.SPOTIFY_USERNAME,
-            playlist_id=settings.SPOTIFY_PLAYLIST)
+            playlist_id=playlist_id)
     )
 
     return current_playlist_tracks.tracks_ids
 
 
-def remove_deleted_tracks(current_tracks, sp, tracks_to_load):
+def remove_deleted_tracks(current_tracks, sp, tracks_to_load, playlist_id):
     for current_track in current_tracks:
         if current_track not in tracks_to_load:
             # Remove the track
             sp.user_playlist_remove_all_occurrences_of_tracks(
                 settings.SPOTIFY_USERNAME,
-                playlist_id=settings.SPOTIFY_PLAYLIST,
+                playlist_id=playlist_id,
                 tracks=[current_track],
             )
 
@@ -124,10 +130,13 @@ def get_artist_track_query(artist_name, track_name):
     return 'artist:"' + artist_name + '" track:"' + track_name + '"'
 
 
-def get_current_tracks_to_load(sp):
+def get_current_tracks_to_load(sp,
+                               scrapped_songs,
+                               correct_songs,
+                               check_released_last_year):
     tracks_to_load = set()
 
-    for song in get_chart():
+    for song in get_chart(scrapped_songs):
 
         artists_names, tracks_names, album_name = format_song(song['artist'],
                                                               song['title'],
@@ -172,7 +181,7 @@ def get_current_tracks_to_load(sp):
                     track = Track(sp.search(q=q, type='track', limit=1))
 
                     # If not found, try with a corrected misspelling version
-                    if track.empty():
+                    if track.empty() and correct_songs == True:
                         corrected_values = correct(artist_name, track_name)
                         if corrected_values is not None:
                             q = get_artist_track_query(
@@ -190,7 +199,10 @@ def get_current_tracks_to_load(sp):
                                 )
                             )
 
-                    if is_release_date_in_last_year(track):
+                    if (is_release_date_in_last_year(track) and \
+                            check_released_last_year) or \
+                        (not track.empty() and \
+                         not check_released_last_year):
                         tracks_to_load.add(track.id)
 
     for track_to_load in tracks_to_load:
@@ -200,31 +212,59 @@ def get_current_tracks_to_load(sp):
     return tracks_to_load
 
 
-def add_new_tracks(current_tracks, sp, tracks_to_load):
+def add_new_tracks(current_tracks, sp, tracks_to_load, playlist_id):
+
+    # Spotify API doesn't allow to load more than 100 tracks per call
+    SPLIT_MAX = 100
+
+    final_tracks_to_append = []
     for track_to_load in tracks_to_load:
         if track_to_load not in current_tracks:
-            # Add the track
+            final_tracks_to_append.append(track_to_load)
+
+    if final_tracks_to_append:
+        # Add all the tracks in one call in chunks of SPLIT_MAX
+        for i in range(0, len(final_tracks_to_append), SPLIT_MAX):
             sp.user_playlist_add_tracks(
                 settings.SPOTIFY_USERNAME,
-                playlist_id=settings.SPOTIFY_PLAYLIST,
-                tracks=[track_to_load],
+                playlist_id=playlist_id,
+                tracks=final_tracks_to_append[i:i+SPLIT_MAX],
             )
 
 
-def update_playlist(sp):
+def update_playlist(sp,
+                    scrapped_songs,
+                    playlist_id,
+                    correct_songs,
+                    check_released_last_year):
 
-    tracks_to_load = get_current_tracks_to_load(sp)
+    tracks_to_load = get_current_tracks_to_load(sp,
+                                                scrapped_songs,
+                                                correct_songs,
+                                                check_released_last_year)
 
-    current_tracks = get_playlist_current_tracks(sp)
+    current_tracks = get_playlist_current_tracks(sp, playlist_id)
 
     # Remove all current tracks that have gone out of the chart
-    remove_deleted_tracks(current_tracks, sp, tracks_to_load)
+    remove_deleted_tracks(current_tracks, sp, tracks_to_load, playlist_id)
 
     # Add all the new tracks that weren't on the playlist
-    add_new_tracks(current_tracks, sp, tracks_to_load)
+    add_new_tracks(current_tracks, sp, tracks_to_load, playlist_id)
 
 
 if __name__ == "__main__":
+    scrapped_songs = sys.argv[1]
+    if scrapped_songs == 'solar_radio.json':
+        playlist_id = settings.SPOTIFY_SOLAR_RADIO_PLAYLIST
+        correct_songs = True
+        check_released_last_year = True
+    elif scrapped_songs == 'sitting_in_the_park.json':
+        playlist_id = settings.SPOTIFY_SITTING_IN_THE_PARK_PLAYLIST
+        correct_songs = False
+        check_released_last_year = False
+    else:
+        sys.exit(-1)
+
     token = util.prompt_for_user_token(
         settings.SPOTIFY_USERNAME,
         scope=SCOPE,
@@ -232,5 +272,8 @@ if __name__ == "__main__":
         client_secret=settings.SPOTIPY_CLIENT_SECRET,
         redirect_uri=settings.SPOTIPY_REDIRECT_URI)
 
-    update_playlist(spotipy.Spotify(auth=token))
-
+    update_playlist(spotipy.Spotify(auth=token),
+                    scrapped_songs,
+                    playlist_id,
+                    correct_songs,
+                    check_released_last_year)

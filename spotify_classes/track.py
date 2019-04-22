@@ -1,4 +1,4 @@
-import album
+from . import album
 
 class Track:
     def __init__(self, track):
