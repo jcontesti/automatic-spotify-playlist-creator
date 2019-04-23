@@ -9,7 +9,6 @@ from dateutil.relativedelta import relativedelta
 import settings
 from correctors.misspelling_corrector import correct
 from spotify_classes.album import Album
-from spotify_classes.playlist import Playlist
 from spotify_classes.track import Track
 
 # Manual transformations of misspellings
@@ -24,10 +23,22 @@ ARTISTS_NAMES_TRANSFORMATIONS = {
 
 # Tracks ids to ignore
 # Useful when we are loading the wrong track but the algorithm can't avoid it
-TRACKS_IDS_TO_IGNORE = ['7pDgsRaydwphT8FlnlzMZd']
+TRACKS_IDS_TO_IGNORE = [
+    # Solar Radio
+    '7pDgsRaydwphT8FlnlzMZd',
+    # Sitting in the Park
+    '23bXewXrq3uZgGXbJOeUfb',
+    '5OeGxh9dqXO1w3qK9oIRXM',
+    '6ET3hABad2RwhqKRG8QCVW',
+    '1JKFEswNdaxDZWajFRYhV1',
+    '4o7O3JojG5diqkjq0upo0T',
+    '31UiUtkjFJDnJM5fkgVJHM',
+    '0Q32v70v1QUtLwGsYHW6rf',
+    '00atCPWLQHH4dGbmkG40Ha',
+    '2tB8w6IDeKXLvdIMD2d7cK',
+]
 
 ARTISTS_NAMES_SPLIT = [' & ',
-                       ' + ',
                        ' ft ',
                        ' feat ',
                        ' feat. ',
@@ -85,14 +96,16 @@ def format_song(artist, track_name, album):
 
 
 def get_playlist_current_tracks(sp, playlist_id):
-
-    current_playlist_tracks = Playlist(
-        sp.user_playlist_tracks(
-            settings.SPOTIFY_USERNAME,
-            playlist_id=playlist_id)
+    results = sp.user_playlist_tracks(
+        settings.SPOTIFY_USERNAME,
+        playlist_id=playlist_id
     )
+    tracks = results['items']
+    while results['next']:  # get more than 100 tracks
+        results = sp.next(results)
+        tracks.extend(results['items'])
 
-    return current_playlist_tracks.tracks_ids
+    return [t['track']['id'] for t in tracks]
 
 
 def remove_deleted_tracks(current_tracks, sp, tracks_to_load, playlist_id):
@@ -106,24 +119,46 @@ def remove_deleted_tracks(current_tracks, sp, tracks_to_load, playlist_id):
             )
 
 
+def extract_released_date(track):
+    release_date = track.album.release_date
+    release_date_precision = track.album.release_date_precision
+    release_date_formatted = datetime.today()
+
+    if release_date_precision == 'year':
+        release_date_formatted = datetime.strptime(release_date, '%Y')
+    if release_date_precision == 'month':
+        release_date_formatted = datetime.strptime(release_date, '%Y-%m')
+    if release_date_precision == 'day':
+        release_date_formatted = datetime.strptime(
+            release_date, '%Y-%m-%d'
+        )
+
+    return release_date_formatted
+
+
 def is_release_date_in_last_year(track):
-    if track.empty():
-        return False
+    return \
+        extract_released_date(track) > datetime.now() - relativedelta(years=1)
+
+
+def is_released_date_in_range_years(track, year_from, year_to):
+    print(datetime(year_from, 1, 1))
+    print(extract_released_date(track))
+    return datetime(year_from, 1, 1) <= extract_released_date(track) \
+            and extract_released_date(track) <= datetime(year_to, 1, 1)
+
+
+def is_relesead_in_expected_dates(track, check_released_year):
+    if check_released_year.get('last_year'):
+        return is_release_date_in_last_year(track)
+    elif check_released_year.get('year_from'):
+        return is_released_date_in_range_years(
+            track,
+            check_released_year.get('year_from'),
+            check_released_year.get('year_to')
+        )
     else:
-        release_date = track.album.release_date
-        release_date_precision = track.album.release_date_precision
-        release_date_formatted = datetime.today()
-
-        if release_date_precision == 'year':
-            release_date_formatted = datetime.strptime(release_date, '%Y')
-        if release_date_precision == 'month':
-            release_date_formatted = datetime.strptime(release_date, '%Y-%m')
-        if release_date_precision == 'day':
-            release_date_formatted = datetime.strptime(
-                release_date, '%Y-%m-%d'
-            )
-
-        return release_date_formatted > datetime.now() - relativedelta(years=1)
+        return True
 
 
 def get_artist_track_query(artist_name, track_name):
@@ -133,7 +168,7 @@ def get_artist_track_query(artist_name, track_name):
 def get_current_tracks_to_load(sp,
                                scrapped_songs,
                                correct_songs,
-                               check_released_last_year):
+                               check_released_year):
     tracks_to_load = set()
 
     for song in get_chart(scrapped_songs):
@@ -199,10 +234,9 @@ def get_current_tracks_to_load(sp,
                                 )
                             )
 
-                    if (is_release_date_in_last_year(track) and \
-                            check_released_last_year) or \
-                        (not track.empty() and \
-                         not check_released_last_year):
+                    if not track.empty() and is_relesead_in_expected_dates(
+                            track,
+                            check_released_year):
                         tracks_to_load.add(track.id)
 
     for track_to_load in tracks_to_load:
@@ -236,12 +270,11 @@ def update_playlist(sp,
                     scrapped_songs,
                     playlist_id,
                     correct_songs,
-                    check_released_last_year):
-
+                    check_released_year):
     tracks_to_load = get_current_tracks_to_load(sp,
                                                 scrapped_songs,
                                                 correct_songs,
-                                                check_released_last_year)
+                                                check_released_year)
 
     current_tracks = get_playlist_current_tracks(sp, playlist_id)
 
@@ -257,11 +290,11 @@ if __name__ == "__main__":
     if scrapped_songs == 'solar_radio.json':
         playlist_id = settings.SPOTIFY_SOLAR_RADIO_PLAYLIST
         correct_songs = True
-        check_released_last_year = True
+        check_released_year = {'last_year': True}
     elif scrapped_songs == 'sitting_in_the_park.json':
         playlist_id = settings.SPOTIFY_SITTING_IN_THE_PARK_PLAYLIST
         correct_songs = False
-        check_released_last_year = False
+        check_released_year = dict()
     else:
         sys.exit(-1)
 
@@ -276,4 +309,4 @@ if __name__ == "__main__":
                     scrapped_songs,
                     playlist_id,
                     correct_songs,
-                    check_released_last_year)
+                    check_released_year)

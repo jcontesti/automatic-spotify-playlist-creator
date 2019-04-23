@@ -4,7 +4,7 @@ import requests
 import json
 
 LINK = 'http://www.sittinginthepark.com/shows.htm'
-
+SONG_TITLES_TO_IGNORE = '?'
 
 def main(destination_file):
     f = requests.get(LINK)
@@ -29,7 +29,8 @@ def main(destination_file):
                 song['album'] = None
                 song['label'] = item[2].strip()
 
-                songs.append(song)
+                if song['title'] not in SONG_TITLES_TO_IGNORE:
+                    songs.append(song)
 
     with open(destination_file, 'w') as outfile:
         json.dump(songs, outfile)
