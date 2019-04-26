@@ -21,13 +21,13 @@ def main(destination_file):
 
     for item in text:
         if '-' in item:
-            item = item.split('-')
-            if len(item) == 3:
+            item = item.split(' - ')
+            if 2 <= len(item) <= 3:
                 song = dict()
                 song['artist'] = item[0].strip()
                 song['title'] = item[1].strip()
                 song['album'] = None
-                song['label'] = item[2].strip()
+                song['label'] = item[2].strip() if len(item) == 3 else None
 
                 if song['title'] not in SONG_TITLES_TO_IGNORE:
                     songs.append(song)

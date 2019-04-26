@@ -24,8 +24,10 @@ ARTISTS_NAMES_TRANSFORMATIONS = {
 # Tracks ids to ignore
 # Useful when we are loading the wrong track but the algorithm can't avoid it
 TRACKS_IDS_TO_IGNORE = [
+
     # Solar Radio
     '7pDgsRaydwphT8FlnlzMZd',
+
     # Sitting in the Park
     '23bXewXrq3uZgGXbJOeUfb',
     '5OeGxh9dqXO1w3qK9oIRXM',
@@ -36,6 +38,44 @@ TRACKS_IDS_TO_IGNORE = [
     '0Q32v70v1QUtLwGsYHW6rf',
     '00atCPWLQHH4dGbmkG40Ha',
     '2tB8w6IDeKXLvdIMD2d7cK',
+    '08wAwH3T9tpQZJqCommPQ4',
+    '50ZNRhSgme0R1VVtyeg0CT',
+    '4AIQCpHyDFf8RFQjN8kvSR',
+    '0q86wtltM3bLjHlDUuKpp3',
+    '3vs955p0PD6RVZIneleAR9',
+    '4L6LeoPbxenjDV0PaVS0CM',
+    '4H5Of0Q4GC1R8juNFLASTr',
+    '0z6kwqZiVdhfkwIuWwG8pM',
+    '4FCwx5XYXU5WQhfstq7Hdq',
+    '2Ue94Ecin4XTH43bMV8Gjw',
+    '1jU0OWb7urv3a1VfDYu93R',
+    '1MRmJF1SrVFymkZWFfHYSz',
+    '6gYQOCg1tK5mxbkOFsS6Y0',
+    '1mO0lZ5se7oxI7sZweF1MP',
+    '796CSByzzzxhGFVzdvcOOJ',
+    '1CPt6KmQ7pIr9J2exiV7KD',
+    '1CSrlw4sF2dV2MBxwJGKVA',
+    '0AFcSOTmCQgDCkyQMvUH6S',
+    '0h7vUwwfrGOL3UFPzhlWsf',
+    '63vk9gScFYXy2DzGYdDSct',
+    '0DJ9r5Zaxtl2Ph90yA6m1Z',
+    '1bC2Lxrd6IXDiAhIh4iTQF',
+    '0nqVfRdvzleIZImGGUU1wu',
+    '6xhiVDN9RIlYEGxmUUQvjX',
+    '2MHkBOKkzaBmofdadKuetQ',
+    '6fhvokluWpuQy5TgcNQkLo',
+    '3tv5TYe7ynHpVhEJpxfUJN',
+    '706yOGnWFkzW3XvMefTkCn',
+    '7avSJE80Rz7qudDKjQOkwB',
+    '5QEKdKOOncqC1ON17Ik1zb',
+    '0cThXovxrvU68JuzYUXhJT',
+    '0JqDibjI2kbbnUFgEN6V7x',
+    '0Gr2y4yFZlBPcMAHdu0ggC',
+    '2gKcZ4L2nbOdQpmTY9XwBW',
+    '64X5L1sTEx1daLnJioeNT5',
+    '1Y1qzhQDgbEkTw0CyXEz79',
+    '5xQgDM04FDIBO6K04qaf6C',
+    '58Obk57g8KXqQM4tAlCZdF',
 ]
 
 ARTISTS_NAMES_SPLIT = [' & ',
@@ -206,7 +246,8 @@ def get_current_tracks_to_load(sp,
 
                         for album_track_id in album_tracks_ids:
                             if album_track_id in artist_top_tracks_ids:
-                                tracks_to_load.add(album_track_id)
+                                if album_track_id not in TRACKS_IDS_TO_IGNORE:
+                                    tracks_to_load.add(album_track_id)
 
                 else:
                     q = get_artist_track_query(artist_name, track_name)
@@ -237,11 +278,8 @@ def get_current_tracks_to_load(sp,
                     if not track.empty() and is_relesead_in_expected_dates(
                             track,
                             check_released_year):
-                        tracks_to_load.add(track.id)
-
-    for track_to_load in tracks_to_load:
-        if track_to_load in TRACKS_IDS_TO_IGNORE:
-            tracks_to_load.remove(track_to_load)
+                        if track.id not in TRACKS_IDS_TO_IGNORE:
+                            tracks_to_load.add(track.id)
 
     return tracks_to_load
 
@@ -289,6 +327,7 @@ if __name__ == "__main__":
     scrapped_songs = sys.argv[1]
     if scrapped_songs == 'solar_radio.json':
         playlist_id = settings.SPOTIFY_SOLAR_RADIO_PLAYLIST
+        split_artists_names = False
         correct_songs = True
         check_released_year = {'last_year': True}
     elif scrapped_songs == 'sitting_in_the_park.json':
