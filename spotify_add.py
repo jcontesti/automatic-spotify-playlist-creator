@@ -76,6 +76,8 @@ TRACKS_IDS_TO_IGNORE = [
     '1Y1qzhQDgbEkTw0CyXEz79',
     '5xQgDM04FDIBO6K04qaf6C',
     '58Obk57g8KXqQM4tAlCZdF',
+    '3xCP1fL5uySt0BTlunKyuY',
+    '5IR2cpoOr0Vm2ZWJgPeeei',
 ]
 
 ARTISTS_NAMES_SPLIT = [' & ',
