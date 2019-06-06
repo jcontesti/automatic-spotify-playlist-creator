@@ -1,5 +1,6 @@
 from . import album
 
+
 class Track:
     def __init__(self, track):
         self._track = track

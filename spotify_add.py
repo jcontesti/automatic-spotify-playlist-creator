@@ -78,6 +78,9 @@ TRACKS_IDS_TO_IGNORE = [
     '58Obk57g8KXqQM4tAlCZdF',
     '3xCP1fL5uySt0BTlunKyuY',
     '5IR2cpoOr0Vm2ZWJgPeeei',
+    '3YYY2KzTAz6BXjtGU9O5FQ',
+    '4uRLhrUTVoZ8ozzcMVDDaN',
+    '6KXTnkBuUKjsm7LTADUL26'
 ]
 
 ARTISTS_NAMES_SPLIT = [' & ',
@@ -109,6 +112,11 @@ def format_song(artist, track_name, album):
     else:
         artists_names = [artist]
 
+    if track_name.endswith(' etc'):  # test to get " etc" songs of Solar Radio
+        contain_etc = True
+    else:
+        contain_etc = False
+
     track_name = track_name.replace('etc', '').replace("'", '')
 
     for split in SONGS_NAMES_SPLIT:
@@ -118,6 +126,9 @@ def format_song(artist, track_name, album):
         tracks_names = track_name.split('#')
     else:
         tracks_names = [track_name]
+
+    if contain_etc:
+        tracks_names.append(VARIOUS_TRACKS[0])
 
     artists_names = [artist_name.strip(' \t\n\r').lower()
                      for artist_name in artists_names]
@@ -259,7 +270,7 @@ def get_current_tracks_to_load(sp,
                     track = Track(sp.search(q=q, type='track', limit=1))
 
                     # If not found, try with a corrected misspelling version
-                    if track.empty() and correct_songs == True:
+                    if track.empty() and correct_songs:
                         corrected_values = correct(artist_name, track_name)
                         if corrected_values is not None:
                             q = get_artist_track_query(
