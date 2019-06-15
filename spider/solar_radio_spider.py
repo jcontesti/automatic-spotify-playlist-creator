@@ -16,9 +16,9 @@ class SolarRadioSpider(scrapy.Spider):
 
         for item in chart[1:]:
             song = dict()
-            song['artist'] = item.xpath('td[3]//text()').extract_first()
-            song['title'] = item.xpath('td[4]//text()').extract_first()
-            song['album'] = item.xpath('td[5]//text()').extract_first()
-            song['label'] = item.xpath('td[6]//text()').extract_first()
+            song['artist'] = item.xpath('td[3]//text()').extract_first() or ''
+            song['title'] = item.xpath('td[4]//text()').extract_first() or ''
+            song['album'] = item.xpath('td[5]//text()').extract_first() or ''
+            song['label'] = item.xpath('td[6]//text()').extract_first() or ''
 
             yield song

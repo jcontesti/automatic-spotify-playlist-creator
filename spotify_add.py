@@ -80,7 +80,16 @@ TRACKS_IDS_TO_IGNORE = [
     '5IR2cpoOr0Vm2ZWJgPeeei',
     '3YYY2KzTAz6BXjtGU9O5FQ',
     '4uRLhrUTVoZ8ozzcMVDDaN',
-    '6KXTnkBuUKjsm7LTADUL26'
+    '6KXTnkBuUKjsm7LTADUL26',
+    '3dzhu9W66GxWvOjAB0uGyP',
+    '5HkpFMklkUcDQhq2bHkMci',
+    '0GIskWpMHsrHDfXDIuQsHR',
+    '1xIG31g1ouBrWKbofhib9A',
+    '22GEEC80DO0RaizN7to4PX',
+    '3qj4fjFMJ1wOUUALQMbNsR',
+    '0KiVrVsxiclqE1g08mcZaV',
+    '5zmQnRiPCSwmdyCAERNtQT',
+    '0GIskWpMHsrHDfXDIuQsHR',
 ]
 
 ARTISTS_NAMES_SPLIT = [' & ',
