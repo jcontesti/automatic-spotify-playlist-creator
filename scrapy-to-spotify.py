@@ -54,9 +54,9 @@ if __name__ == "__main__":
     token = util.prompt_for_user_token(
         settings.SPOTIFY_USERNAME,
         scope=settings.SPOTIFY_SCOPE,
-        client_id=settings.SPOTIFY_CLIENT_ID,
-        client_secret=settings.SPOTIFY_CLIENT_SECRET,
-        redirect_uri=settings.SPOTIFY_REDIRECT_URI)
+        client_id=settings.SPOTIPY_CLIENT_ID,
+        client_secret=settings.SPOTIPY_CLIENT_SECRET,
+        redirect_uri=settings.SPOTIPY_REDIRECT_URI)
 
     config_files = glob.glob(PLAYLISTS_CONFIG_PATH)
 
