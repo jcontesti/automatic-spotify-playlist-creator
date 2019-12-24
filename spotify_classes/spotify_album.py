@@ -1,6 +1,7 @@
-from . import artist
+from . import spotify_artist
 
-class Album:
+
+class SpotifyAlbum:
     def __init__(self, album):
         self._album = album
 
@@ -10,7 +11,7 @@ class Album:
 
     @property
     def main_artist(self):
-        return artist.Artist(self._album['albums']['items'][0]['artists'][0])
+        return spotify_artist.Artist(self._album['albums']['items'][0]['artists'][0])
 
     @property
     def release_date(self):
@@ -23,5 +24,5 @@ class Album:
     def tracks_ids(self, sp):
         return [t['id'] for t in sp.album_tracks(self.id)['items']]
 
-    def empty(self):
+    def is_empty(self):
         return not self._album['albums']['items']

@@ -1,4 +1,4 @@
-class Artist:
+class SpotifyArtist:
     def __init__(self, artist):
         self._artist = artist
 

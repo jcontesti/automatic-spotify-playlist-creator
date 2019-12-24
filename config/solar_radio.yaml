@@ -1,0 +1,38 @@
+name:
+  Solar Radio Weekly playlist
+spider_module:
+  config.solar_radio_spider
+spider_class:
+  SolarRadioSpider
+spotify_playlist:
+  spotify:user:jcontesti:playlist:7mRgiLA8dqhtR3gBecc8in
+spotify_ignored_tracks:
+  - 7pDgsRaydwphT8FlnlzMZd
+spotify_country:
+  GB
+artists_split:
+  - ' & '
+  - ' ft '
+  - ' feat '
+  - ' feat. '
+  - ' with '
+  - ' and '
+songs_titles_split:
+  - '/'
+various_titles_in_one_tokens:
+  - 'various tracks'
+  - 'various songs'
+  - ' etc'
+check_released_last_year:
+  True
+misspelling_corrector_module:
+  correctors.google_misspelling_corrector
+misspelling_corrector_class:
+  GoogleMisspellingCorrector
+artists_transformations:
+  - '480 east': 'four80east'
+  - 'agape soul': 'darryl anders agapesoul'
+  - 'christian grey': 'christon gray'
+  - 'india arie': 'india.arie'
+  - 'o''jays': 'the ojays'
+  - 'vivian sessions': 'vivian sessoms'

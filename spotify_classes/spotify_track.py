@@ -1,7 +1,7 @@
-from . import album
+from . import spotify_album
 
 
-class Track:
+class SpotifyTrack:
     def __init__(self, track):
         self._track = track
 
@@ -14,7 +14,8 @@ class Track:
 
     @property
     def album(self):
-        return album.Album(self._track['tracks']['items'][0]['album'])
+        return spotify_album.SpotifyAlbum(self._track['tracks']['items'][0]['album'])
 
-    def empty(self):
+    def is_empty(self):
         return not self._track['tracks']['items']
+

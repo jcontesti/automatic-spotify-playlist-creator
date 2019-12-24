@@ -103,6 +103,7 @@ venv.bak/
 # mypy
 .mypy_cache/
 
-*.json
+# scrapy-to-spotify
 .cache*
 .idea
+tmp/
