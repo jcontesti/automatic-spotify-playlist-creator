@@ -9,8 +9,8 @@ import settings
 import spotipy
 from scrapy.crawler import CrawlerProcess
 import spotipy.util as util
-from scrapped_song import ScrappedSong
-from scrapped_playlist import ScrappedPlaylist
+from scrapped_classes.scrapped_song import ScrappedSong
+from scrapped_classes.scrapped_playlist import ScrappedPlaylist
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
