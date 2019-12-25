@@ -1,0 +1,37 @@
+name:
+  Starpoint UK Soul Chart
+spider_module:
+  config.starpoint_uk_soul_chart_spider
+spider_class:
+  StarpointUKSoulChartSpider
+spotify_playlist:
+  spotify:user:m9wnok64hlpbzmrqpdmhmmz28:playlist:6VstDi64INlbVb9N9iZ6fZ
+spotify_ignored_tracks:
+spotify_country:
+  GB
+artists_split:
+  - ' & '
+  - ' ft '
+  - ' ft. '
+  - ' feat '
+  - ' feat. '
+  - ' presents '
+  - ' pres. '
+  - ' with '
+  - ' and '
+  -  ', '
+songs_titles_split:
+  - '/'
+various_titles_in_one_tokens:
+  - 'various tracks'
+  - 'various songs'
+  - ' etc'
+check_released_last_year:
+  True
+misspelling_correctors:
+  # Add them as: module name: class name.
+  # They will be executed from top to bottom, until one correction is
+  # accepted by Spotify
+  - correctors.lastfm_misspelling_corrector: LastFMMisspellingCorrector
+  - correctors.google_misspelling_corrector: GoogleMisspellingCorrector
+artists_transformations:

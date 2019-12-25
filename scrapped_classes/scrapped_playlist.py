@@ -223,8 +223,10 @@ class ScrappedPlaylist:
                 if not self._is_released_in_last_year(track):
                     return
 
-            if self._spotify_ignored_tracks \
-                    and track.id not in self._spotify_ignored_tracks:
+            if (self._spotify_ignored_tracks and
+                track.id not in self._spotify_ignored_tracks) \
+                or self._spotify_ignored_tracks is None:
+
                 logging.info('Adding ' + q + ' to tracks to load')
                 self._tracks_to_load.add(track.id)
 
@@ -243,9 +245,11 @@ class ScrappedPlaylist:
 
                 for song_title in songs_titles:
 
-                    if any(token in song_title
-                           for token in self._various_titles_in_one_tokens) \
-                       and album:
+                    if self._various_titles_in_one_tokens and \
+                            any(token in song_title
+                                for token in self._various_titles_in_one_tokens
+                                ) \
+                            and album:
 
                         # Get song without tokens
                         for token in self._various_titles_in_one_tokens:
