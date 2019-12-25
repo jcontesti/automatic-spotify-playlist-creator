@@ -1,8 +1,8 @@
 import scrapy
 
 
-class SolarRadioSpider(scrapy.Spider):
-    name = "solar radio spider"
+class SolarRadioSweetRhythmsChartSpider(scrapy.Spider):
+    name = 'SolarRadioSweetRhythmsChartSpider'
     start_urls = [
         'http://www.solarradio.com/show/sweet-rhythms-chart/',
     ]

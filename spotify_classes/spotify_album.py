@@ -11,7 +11,7 @@ class SpotifyAlbum:
 
     @property
     def main_artist(self):
-        return spotify_artist.Artist(self._album['albums']['items'][0]['artists'][0])
+        return spotify_artist.SpotifyArtist(self._album['albums']['items'][0]['artists'][0])
 
     @property
     def release_date(self):

@@ -1,23 +1,26 @@
 import glob
-import logging
 import importlib
-import os
-import sys
 import json
-import yaml
-import settings
+import logging
+import shutil
+import sys
+
 import spotipy
-from scrapy.crawler import CrawlerProcess
 import spotipy.util as util
-from scrapped_classes.scrapped_song import ScrappedSong
+import yaml
+from scrapy.crawler import CrawlerProcess
+
+import settings
 from scrapped_classes.scrapped_playlist import ScrappedPlaylist
+from scrapped_classes.scrapped_song import ScrappedSong
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 PLAYLISTS_CONFIG_PATH = './config/*.yaml'
 SPIDER_USER_AGENT = 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1)'
 SPIDER_FEED_FORMAT = 'json'
-SPIDER_FEED_URI = './tmp/playlist_data.json'
+SPIDER_DIR = './tmp/'
+SPIDER_FILE = '%(name)s.json'
 
 
 def read_yaml(yaml_file):
@@ -28,25 +31,22 @@ def read_yaml(yaml_file):
             print(exc)
 
 
-def execute_spider(module, class_name):
-    spider_module = importlib.import_module(module)
-    spider_class = getattr(spider_module, class_name)
-
+def execute_spider(spiders):
     try:
-        os.remove(SPIDER_FEED_URI)
+        shutil.rmtree(SPIDER_DIR)
     except OSError:
         pass
 
     process = CrawlerProcess({
         'USER_AGENT': SPIDER_USER_AGENT,
         'FEED_FORMAT': SPIDER_FEED_FORMAT,
-        'FEED_URI': SPIDER_FEED_URI,
+        'FEED_URI': SPIDER_DIR + SPIDER_FILE,
     })
-    process.crawl(spider_class)
-    process.start()
 
-    with open(SPIDER_FEED_URI) as f:
-        return json.load(f)
+    for spider in spiders:
+        process.crawl(spider)
+
+    process.start()
 
 
 if __name__ == "__main__":
@@ -60,6 +60,7 @@ if __name__ == "__main__":
 
     config_files = glob.glob(PLAYLISTS_CONFIG_PATH)
 
+    spiders = []
     for config_file in config_files:
 
         playlist_config = read_yaml(config_file)
@@ -67,56 +68,62 @@ if __name__ == "__main__":
 
         spider_module_name = playlist_config.get('spider_module')
         spider_class_name = playlist_config.get('spider_class')
-        spider_results = execute_spider(spider_module_name, spider_class_name)
+        spider_module = importlib.import_module(spider_module_name)
+        spider = getattr(spider_module, spider_class_name)
+        spiders.append(spider)
+
+    execute_spider(spiders)
+
+    for config_file in config_files:
+
+        playlist_config = read_yaml(config_file)
+
+        spider_class = playlist_config.get('spider_class')
+
+        with open(SPIDER_DIR + spider_class + '.json') as f:
+            results = json.load(f)
 
         scrapped_songs = []
-        for spider_result in spider_results:
-            artist = spider_result['artist']
-            title = spider_result['title']
-            album = spider_result['album']
-            label = spider_result['label']
+        for result in results:
+            artist = result['artist']
+            title = result['title']
+            album = result['album']
+            label = result['label']
 
             scrapped_song = ScrappedSong(artist, title, album, label)
 
             scrapped_songs.append(scrapped_song)
 
-        spotify_playlist = playlist_config.get('spotify_playlist')
-        spotify_session = spotipy.Spotify(auth=token)
-        spotify_username = settings.SPOTIFY_USERNAME
-        spotify_country = playlist_config.get('spotify_country')
-        spotify_ignored_tracks = playlist_config.get('spotify_ignored_tracks')
-        artists_split = playlist_config.get('artists_split')
-        songs_titles_split = playlist_config.get('songs_titles_split')
-        various_titles_in_one_tokens = \
-            playlist_config.get('various_titles_in_one_tokens')
-        check_released_last_year = \
-            playlist_config.get('check_released_last_year')
-        misspelling_corrector_module = \
-            playlist_config.get('misspelling_corrector_module')
-        misspelling_corrector_class = \
-            playlist_config.get('misspelling_corrector_class')
-        artists_transformations = \
-            playlist_config.get('artists_transformations')
+        if scrapped_songs:
+            spotify_playlist = playlist_config.get('spotify_playlist')
+            spotify_session = spotipy.Spotify(auth=token)
+            spotify_username = settings.SPOTIFY_USERNAME
+            spotify_country = playlist_config.get('spotify_country')
+            spotify_ignored_tracks = \
+                playlist_config.get('spotify_ignored_tracks')
+            artists_split = playlist_config.get('artists_split')
+            songs_titles_split = playlist_config.get('songs_titles_split')
+            various_titles_in_one_tokens = \
+                playlist_config.get('various_titles_in_one_tokens')
+            check_released_last_year = \
+                playlist_config.get('check_released_last_year')
+            misspelling_correctors = \
+                playlist_config.get('misspelling_correctors')
+            artists_transformations = \
+                playlist_config.get('artists_transformations')
 
-        scrapped_playlist = ScrappedPlaylist(
-            spotify_playlist,
-            spotify_session,
-            spotify_username,
-            spotify_country,
-            scrapped_songs,
-            spotify_ignored_tracks,
-            artists_split,
-            songs_titles_split,
-            various_titles_in_one_tokens,
-            check_released_last_year,
-            misspelling_corrector_module,
-            misspelling_corrector_class,
-            artists_transformations)
+            scrapped_playlist = ScrappedPlaylist(
+                spotify_playlist,
+                spotify_session,
+                spotify_username,
+                spotify_country,
+                scrapped_songs,
+                spotify_ignored_tracks,
+                artists_split,
+                songs_titles_split,
+                various_titles_in_one_tokens,
+                check_released_last_year,
+                misspelling_correctors,
+                artists_transformations)
 
-        scrapped_playlist.update_playlist()
-
-
-
-
-
-
+            scrapped_playlist.update_playlist()

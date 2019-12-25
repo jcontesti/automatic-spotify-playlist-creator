@@ -1,9 +1,9 @@
 name:
-  Solar Radio Weekly playlist
+  Solar Radio Sweet Rhythms Chart
 spider_module:
-  config.solar_radio_spider
+  config.solar_radio_sweet_rhythms_chart_spider
 spider_class:
-  SolarRadioSpider
+  SolarRadioSweetRhythmsChartSpider
 spotify_playlist:
   spotify:user:m9wnok64hlpbzmrqpdmhmmz28:playlist:1jdWpPBFTkxvtk935zXEWu
 spotify_ignored_tracks:
@@ -13,10 +13,14 @@ spotify_country:
 artists_split:
   - ' & '
   - ' ft '
+  - ' ft. '
   - ' feat '
   - ' feat. '
+  - ' presents '
+  - ' pres. '
   - ' with '
   - ' and '
+  - ', '
 songs_titles_split:
   - '/'
 various_titles_in_one_tokens:
@@ -25,14 +29,18 @@ various_titles_in_one_tokens:
   - ' etc'
 check_released_last_year:
   True
-misspelling_corrector_module:
-  correctors.google_misspelling_corrector
-misspelling_corrector_class:
-  GoogleMisspellingCorrector
+misspelling_correctors:
+  # Add them as: module name: class name.
+  # They will be executed from top to bottom, until one correction is
+  # accepted by Spotify
+  - correctors.lastfm_misspelling_corrector: LastFMMisspellingCorrector
+  - correctors.google_misspelling_corrector: GoogleMisspellingCorrector
 artists_transformations:
   - '480 east': 'four80east'
   - 'agape soul': 'darryl anders agapesoul'
   - 'christian grey': 'christon gray'
+  - 'cornell carter': 'cornell c.c. carter'
+  - 'hil st soul': 'hil st. soul'
   - 'india arie': 'india.arie'
   - 'o''jays': 'the ojays'
   - 'vivian sessions': 'vivian sessoms'
