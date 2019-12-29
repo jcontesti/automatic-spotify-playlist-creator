@@ -2,9 +2,9 @@ import scrapy
 
 
 class SolarRadioSweetRhythmsChartSpider(scrapy.Spider):
-    name = 'SolarRadioSweetRhythmsChartSpider'
+    name = "SolarRadioSweetRhythmsChartSpider"
     start_urls = [
-        'http://www.solarradio.com/show/sweet-rhythms-chart/',
+        "http://www.solarradio.com/show/sweet-rhythms-chart/",
     ]
 
     def parse(self, response):
@@ -15,20 +15,18 @@ class SolarRadioSweetRhythmsChartSpider(scrapy.Spider):
 
     @staticmethod
     def _parse_playlist(response):
-        chart = response.xpath(
-            '//div[@class="myplaylist-playlist-entires"]/table//tr'
-        )
+        chart = response.xpath('//div[@class="myplaylist-playlist-entires"]/table//tr')
 
         for item in chart[1:]:
-            artist = item.xpath('td[3]//text()').extract_first()
-            title = item.xpath('td[4]//text()').extract_first()
-            album = item.xpath('td[5]//text()').extract_first() or ''
-            label = item.xpath('td[6]//text()').extract_first() or ''
+            artist = item.xpath("td[3]//text()").extract_first()
+            title = item.xpath("td[4]//text()").extract_first()
+            album = item.xpath("td[5]//text()").extract_first() or ""
+            label = item.xpath("td[6]//text()").extract_first() or ""
 
             song = dict()
-            song['artist'] = artist
-            song['title'] = title
-            song['album'] = album
-            song['label'] = label
+            song["artist"] = artist
+            song["title"] = title
+            song["album"] = album
+            song["label"] = label
 
             yield song

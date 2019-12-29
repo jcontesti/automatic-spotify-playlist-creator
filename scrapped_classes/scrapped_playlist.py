@@ -6,20 +6,23 @@ from dateutil.relativedelta import relativedelta
 from spotify_classes.spotify_album import SpotifyAlbum
 from spotify_classes.spotify_track import SpotifyTrack
 
+
 class ScrappedPlaylist:
-    def __init__(self,
-                 spotify_playlist,
-                 spotify_session,
-                 spotify_username,
-                 spotify_country,
-                 scrapped_tracks,
-                 spotify_ignored_tracks,
-                 artists_split,
-                 songs_titles_split,
-                 various_titles_in_one_tokens,
-                 check_released_last_year,
-                 misspelling_correctors,
-                 artists_transformations):
+    def __init__(
+        self,
+        spotify_playlist,
+        spotify_session,
+        spotify_username,
+        spotify_country,
+        scrapped_tracks,
+        spotify_ignored_tracks,
+        artists_split,
+        songs_titles_split,
+        various_titles_in_one_tokens,
+        check_released_last_year,
+        misspelling_correctors,
+        artists_transformations,
+    ):
         self._spotify_playlist = spotify_playlist
         self._spotify_session = spotify_session
         self._spotify_username = spotify_username
@@ -38,19 +41,14 @@ class ScrappedPlaylist:
 
         if misspelling_correctors:
             for misspelling_corrector in misspelling_correctors:
-                misspelling_corrector_module = \
-                    list(misspelling_corrector.keys())[0]
-                misspelling_corrector_class = \
-                    misspelling_corrector.get(misspelling_corrector_module)
-
-                corrector_module = importlib.import_module(
+                misspelling_corrector_module = list(misspelling_corrector.keys())[0]
+                misspelling_corrector_class = misspelling_corrector.get(
                     misspelling_corrector_module
                 )
 
-                corrector = getattr(
-                    corrector_module,
-                    misspelling_corrector_class
-                )
+                corrector_module = importlib.import_module(misspelling_corrector_module)
+
+                corrector = getattr(corrector_module, misspelling_corrector_class)
 
                 self._correctors.append(corrector)
 
@@ -62,41 +60,43 @@ class ScrappedPlaylist:
         album_title = scrapped_song.album.lower()
 
         for split in self._artists_split:
-            artist = artist.replace(split, '#')
+            artist = artist.replace(split, "#")
 
-        if '#' in artist:
-            artists_names = artist.split('#')
+        if "#" in artist:
+            artists_names = artist.split("#")
         else:
             artists_names = [artist]
 
         for split in self._songs_titles_split:
-            song_title = song_title.replace(split, '#')
+            song_title = song_title.replace(split, "#")
 
-        if '#' in song_title:
-            songs_titles = song_title.split('#')
+        if "#" in song_title:
+            songs_titles = song_title.split("#")
         else:
             songs_titles = [song_title]
 
-        artists_names = [artist_name.strip(' \t\n\r')
-                         for artist_name in artists_names]
-        songs_titles = [song_title.strip(' \t\n\r')
-                        for song_title in songs_titles]
-        album_title = album_title.strip(' \t\n\r') \
-            if album_title is not None else album_title
+        artists_names = [artist_name.strip(" \t\n\r") for artist_name in artists_names]
+        songs_titles = [song_title.strip(" \t\n\r") for song_title in songs_titles]
+        album_title = (
+            album_title.strip(" \t\n\r") if album_title is not None else album_title
+        )
 
         artists_names_transformed = []
         for artist_name in artists_names:
-            if self._artists_transformations and \
-                    self._artists_transformations[0].get(artist_name):
+            if self._artists_transformations and self._artists_transformations[0].get(
+                artist_name
+            ):
                 artists_names_transformed.append(
                     self._artists_transformations[0].get(artist_name)
                 )
             else:
                 artists_names_transformed.append(artist_name)
 
-        return {'artists_names': artists_names_transformed,
-                'songs_titles': songs_titles,
-                'album': album_title}
+        return {
+            "artists_names": artists_names_transformed,
+            "songs_titles": songs_titles,
+            "album": album_title,
+        }
 
     def _format_scrapped_tracks(self):
         self._formatted_songs = []
@@ -110,26 +110,21 @@ class ScrappedPlaylist:
         release_date_precision = track.album.release_date_precision
         release_date_formatted = datetime.today()
 
-        if release_date_precision == 'year':
-            release_date_formatted = datetime.strptime(release_date, '%Y')
-        if release_date_precision == 'month':
-            release_date_formatted = datetime.strptime(release_date, '%Y-%m')
-        if release_date_precision == 'day':
-            release_date_formatted = datetime.strptime(
-                release_date, '%Y-%m-%d'
-            )
+        if release_date_precision == "year":
+            release_date_formatted = datetime.strptime(release_date, "%Y")
+        if release_date_precision == "month":
+            release_date_formatted = datetime.strptime(release_date, "%Y-%m")
+        if release_date_precision == "day":
+            release_date_formatted = datetime.strptime(release_date, "%Y-%m-%d")
 
         return release_date_formatted
 
     def _is_released_in_last_year(self, track):
-        return self._extract_released_date(track) > datetime.now() - \
-               relativedelta(years=1)
+        return self._extract_released_date(track) > datetime.now() - relativedelta(
+            years=1
+        )
 
-    def _get_most_interesting_songs_of_album(
-            self,
-            artist_name,
-            album
-    ):
+    def _get_most_interesting_songs_of_album(self, artist_name, album):
         # We will try to collect the most interesting tracks
         # of the album. Spotify doesn't allow to know the
         # number of plays per album, but we'll use
@@ -139,30 +134,25 @@ class ScrappedPlaylist:
 
         q = self._get_artist_album_query(artist_name, album)
 
-        logging.info('Querying: ' + q)
+        logging.info("Querying: " + q)
 
-        album = SpotifyAlbum(
-            self._spotify_session.search(q=q,
-                                         type='album',
-                                         limit=1)
-        )
+        album = SpotifyAlbum(self._spotify_session.search(q=q, type="album", limit=1))
 
         if not album.is_empty():
             artist = album.main_artist
 
-            album_tracks_ids = album.tracks_ids(
-                self._spotify_session
-            )
+            album_tracks_ids = album.tracks_ids(self._spotify_session)
             artist_top_tracks_ids = artist.top_tracks_ids(
-                self._spotify_session,
-                self._spotify_country
+                self._spotify_session, self._spotify_country
             )
 
             for album_track_id in album_tracks_ids:
                 if album_track_id in artist_top_tracks_ids:
-                    if self._spotify_ignored_tracks and \
-                            album_track_id not in self._spotify_ignored_tracks:
-                        logging.info('Adding ' + q + ' to tracks to load')
+                    if (
+                        self._spotify_ignored_tracks
+                        and album_track_id not in self._spotify_ignored_tracks
+                    ):
+                        logging.info("Adding " + q + " to tracks to load")
                         self._tracks_to_load.add(album_track_id)
 
     @staticmethod
@@ -173,46 +163,28 @@ class ScrappedPlaylist:
     def _get_artist_track_query(artist, song):
         return 'artist:"' + artist + '" track:"' + song + '"'
 
-    def _get_song(
-            self,
-            artist_name,
-            song_name
-    ):
+    def _get_song(self, artist_name, song_name):
         q = self._get_artist_track_query(artist_name, song_name)
 
-        logging.info('Querying: ' + q)
+        logging.info("Querying: " + q)
 
-        track = SpotifyTrack(
-            self._spotify_session.search(
-                q=q,
-                type='track',
-                limit=1
-            )
-        )
+        track = SpotifyTrack(self._spotify_session.search(q=q, type="track", limit=1))
 
         # If not found, try with a corrected misspelling version
         if track.is_empty() and self._correctors:
 
             for corrector in self._correctors:
 
-                corrected_values = corrector.correct(
-                    artist_name,
-                    song_name
-                )
+                corrected_values = corrector.correct(artist_name, song_name)
                 if corrected_values is not None:
                     q = self._get_artist_track_query(
-                        corrected_values['artist'],
-                        corrected_values['song']
+                        corrected_values["artist"], corrected_values["song"]
                     )
 
-                    logging.info('Querying corrected: ' + q)
+                    logging.info("Querying corrected: " + q)
 
                     track = SpotifyTrack(
-                        self._spotify_session.search(
-                            q=q,
-                            type='track',
-                            limit=1
-                        )
+                        self._spotify_session.search(q=q, type="track", limit=1)
                     )
                     if not track.is_empty():
                         break
@@ -223,11 +195,12 @@ class ScrappedPlaylist:
                 if not self._is_released_in_last_year(track):
                     return
 
-            if (self._spotify_ignored_tracks and
-                track.id not in self._spotify_ignored_tracks) \
-                or self._spotify_ignored_tracks is None:
+            if (
+                self._spotify_ignored_tracks
+                and track.id not in self._spotify_ignored_tracks
+            ) or self._spotify_ignored_tracks is None:
 
-                logging.info('Adding ' + q + ' to tracks to load')
+                logging.info("Adding " + q + " to tracks to load")
                 self._tracks_to_load.add(track.id)
 
     def _get_current_tracks_to_load(self):
@@ -237,55 +210,53 @@ class ScrappedPlaylist:
 
         for formatted_song in self._formatted_songs:
 
-            artists_names = formatted_song.get('artists_names')
-            songs_titles = formatted_song.get('songs_titles')
-            album = formatted_song.get('album')
+            artists_names = formatted_song.get("artists_names")
+            songs_titles = formatted_song.get("songs_titles")
+            album = formatted_song.get("album")
 
             for artist_name in artists_names:
 
                 for song_title in songs_titles:
 
-                    if self._various_titles_in_one_tokens and \
-                            any(token in song_title
-                                for token in self._various_titles_in_one_tokens
-                                ) \
-                            and album:
+                    if (
+                        self._various_titles_in_one_tokens
+                        and any(
+                            token in song_title
+                            for token in self._various_titles_in_one_tokens
+                        )
+                        and album
+                    ):
 
                         # Get song without tokens
                         for token in self._various_titles_in_one_tokens:
-                            song_title = song_title.replace(token, '')
+                            song_title = song_title.replace(token, "")
                         self._get_song(artist_name, song_title)
 
                         # Get also most interesting songs of the album
-                        self._get_most_interesting_songs_of_album(
-                            artist_name,
-                            album
-                        )
+                        self._get_most_interesting_songs_of_album(artist_name, album)
                     else:
                         self._get_song(artist_name, song_title)
 
     def _get_playlist_current_tracks(self):
         results = self._spotify_session.user_playlist_tracks(
-            self._spotify_username,
-            playlist_id=self._spotify_playlist
+            self._spotify_username, playlist_id=self._spotify_playlist
         )
-        tracks = results['items']
-        while results['next']:  # to get more than 100 tracks
+        tracks = results["items"]
+        while results["next"]:  # to get more than 100 tracks
             results = self._spotify_session.next(results)
-            tracks.extend(results['items'])
+            tracks.extend(results["items"])
 
-        return [t['track']['id'] for t in tracks]
+        return [t["track"]["id"] for t in tracks]
 
     def _remove_deleted_tracks(self, current_tracks):
         for current_track in current_tracks:
             if current_track not in self._tracks_to_load:
                 # Remove the track
-                self._spotify_session\
-                    .user_playlist_remove_all_occurrences_of_tracks(
-                        self._spotify_username,
-                        playlist_id=self._spotify_playlist,
-                        tracks=[current_track],
-                    )
+                self._spotify_session.user_playlist_remove_all_occurrences_of_tracks(
+                    self._spotify_username,
+                    playlist_id=self._spotify_playlist,
+                    tracks=[current_track],
+                )
 
     def _add_new_tracks(self, current_tracks):
 
@@ -294,7 +265,7 @@ class ScrappedPlaylist:
 
         final_tracks_to_append = []
         for track_to_load in self._tracks_to_load:
-            if track_to_load not in current_tracks:     # to avoid duplicates
+            if track_to_load not in current_tracks:  # to avoid duplicates
                 final_tracks_to_append.append(track_to_load)
 
         if final_tracks_to_append:
@@ -303,7 +274,7 @@ class ScrappedPlaylist:
                 self._spotify_session.user_playlist_add_tracks(
                     self._spotify_username,
                     playlist_id=self._spotify_playlist,
-                    tracks=final_tracks_to_append[i:i + SPLIT_MAX],
+                    tracks=final_tracks_to_append[i : i + SPLIT_MAX],
                 )
 
     def update_playlist(self):
