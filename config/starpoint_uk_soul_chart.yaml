@@ -22,6 +22,7 @@ artists_split:
   -  ', '
 songs_titles_split:
   - '/'
+  - ' - '
 various_titles_in_one_tokens:
   - 'various tracks'
   - 'various songs'
