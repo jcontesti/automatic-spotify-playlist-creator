@@ -7,6 +7,8 @@ class StarpointUKSoulChartSpider(scrapy.Spider):
         "http://www.uksoulchart.com/top30/",
     ]
 
+    ALBUM_INDICATOR = " Album"
+
     def parse(self, response):
         chart = response.xpath('//table[@id="tchart"]//tr/td[@class="artist"]')
 
@@ -18,7 +20,13 @@ class StarpointUKSoulChartSpider(scrapy.Spider):
             song = dict()
             song["artist"] = artist
             song["title"] = title
-            song["album"] = ""
+            song["album"] = (
+                title.replace(self.ALBUM_INDICATOR, "")
+                if self.ALBUM_INDICATOR in title
+                else ""
+            )
             song["label"] = ""
+
+            print(song)
 
             yield song
