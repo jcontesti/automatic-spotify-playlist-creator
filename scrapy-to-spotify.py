@@ -108,6 +108,9 @@ if __name__ == "__main__":
             various_titles_in_one_tokens = playlist_config.get(
                 "various_titles_in_one_tokens"
             )
+            get_only_most_played_songs_from_albums = playlist_config.get(
+                "get_only_most_played_songs_from_albums"
+            )
             check_released_last_year = playlist_config.get("check_released_last_year")
             misspelling_correctors = playlist_config.get("misspelling_correctors")
             artists_transformations = playlist_config.get("artists_transformations")
@@ -122,6 +125,7 @@ if __name__ == "__main__":
                 artists_split,
                 songs_titles_split,
                 various_titles_in_one_tokens,
+                get_only_most_played_songs_from_albums,
                 check_released_last_year,
                 misspelling_correctors,
                 artists_transformations,

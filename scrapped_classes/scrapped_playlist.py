@@ -19,6 +19,7 @@ class ScrappedPlaylist:
         artists_split,
         songs_titles_split,
         various_titles_in_one_tokens,
+        get_only_most_played_songs_from_albums,
         check_released_last_year,
         misspelling_correctors,
         artists_transformations,
@@ -32,6 +33,9 @@ class ScrappedPlaylist:
         self._artists_split = artists_split
         self._songs_titles_split = songs_titles_split
         self._various_titles_in_one_tokens = various_titles_in_one_tokens
+        self._get_only_most_played_songs_from_albums = (
+            get_only_most_played_songs_from_albums
+        )
         self._check_released_last_year = check_released_last_year
         self._artists_transformations = artists_transformations
         self._load_misspelling_correctors(misspelling_correctors)
@@ -124,14 +128,7 @@ class ScrappedPlaylist:
             years=1
         )
 
-    def _get_most_interesting_songs_of_album(self, artist_name, album):
-        # We will try to collect the most interesting tracks
-        # of the album. Spotify doesn't allow to know the
-        # number of plays per album, but we'll use
-        # a work-around: if any track is included in the most
-        # played tracks of the artist, we'll add it
-        # to the playlist
-
+    def _get_albums_songs(self, artist_name, album):
         q = self._get_artist_album_query(artist_name, album)
 
         logging.info("Querying: " + q)
@@ -142,16 +139,28 @@ class ScrappedPlaylist:
             artist = album.main_artist
 
             album_tracks_ids = album.tracks_ids(self._spotify_session)
-            artist_top_tracks_ids = artist.top_tracks_ids(
-                self._spotify_session, self._spotify_country
-            )
+
+            artist_top_tracks_ids = []
+            if self._get_only_most_played_songs_from_albums:
+                # We will try to collect the most interesting tracks
+                # of the album. Spotify doesn't allow to know the
+                # number of plays per album, but we'll use
+                # a work-around: if any track is included in the most
+                # played tracks of the artist, we'll add it
+                # to the playlist
+                artist_top_tracks_ids = artist.top_tracks_ids(
+                    self._spotify_session, self._spotify_country
+                )
 
             for album_track_id in album_tracks_ids:
-                if album_track_id in artist_top_tracks_ids:
-                    if (
-                        self._spotify_ignored_tracks
-                        and album_track_id not in self._spotify_ignored_tracks
-                    ):
+                if (
+                    self._get_only_most_played_songs_from_albums
+                    and album_track_id in artist_top_tracks_ids
+                ) or not self._get_only_most_played_songs_from_albums:
+                    if(
+                            self._spotify_ignored_tracks
+                            and album_track_id not in self._spotify_ignored_tracks
+                    ) or self._spotify_ignored_tracks is None:
                         logging.info("Adding " + q + " to tracks to load")
                         self._tracks_to_load.add(album_track_id)
 
@@ -232,8 +241,8 @@ class ScrappedPlaylist:
                             song_title = song_title.replace(token, "")
                         self._get_song(artist_name, song_title)
 
-                        # Get also most interesting songs of the album
-                        self._get_most_interesting_songs_of_album(artist_name, album)
+                        # Get songs form the album
+                        self._get_albums_songs(artist_name, album)
                     else:
                         self._get_song(artist_name, song_title)
 
