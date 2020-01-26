@@ -21,8 +21,8 @@ class ScrappedPlaylist:
         various_titles_in_one_tokens,
         get_only_most_played_songs_from_albums,
         check_released_last_year,
-        misspelling_correctors,
         artists_transformations,
+        corrector,
     ):
         self._spotify_playlist = spotify_playlist
         self._spotify_session = spotify_session
@@ -38,23 +38,7 @@ class ScrappedPlaylist:
         )
         self._check_released_last_year = check_released_last_year
         self._artists_transformations = artists_transformations
-        self._load_misspelling_correctors(misspelling_correctors)
-
-    def _load_misspelling_correctors(self, misspelling_correctors):
-        self._correctors = []
-
-        if misspelling_correctors:
-            for misspelling_corrector in misspelling_correctors:
-                misspelling_corrector_module = list(misspelling_corrector.keys())[0]
-                misspelling_corrector_class = misspelling_corrector.get(
-                    misspelling_corrector_module
-                )
-
-                corrector_module = importlib.import_module(misspelling_corrector_module)
-
-                corrector = getattr(corrector_module, misspelling_corrector_class)
-
-                self._correctors.append(corrector)
+        self._corrector = corrector
 
     def _format_scrapped_song(self, scrapped_song):
         # One scrapped song can include many artists and song titles
@@ -131,7 +115,7 @@ class ScrappedPlaylist:
     def _get_albums_songs(self, artist_name, album):
         q = self._get_artist_album_query(artist_name, album)
 
-        logging.info("Querying: " + q)
+        logging.info("Querying album: " + q)
 
         album = SpotifyAlbum(self._spotify_session.search(q=q, type="album", limit=1))
 
@@ -157,9 +141,9 @@ class ScrappedPlaylist:
                     self._get_only_most_played_songs_from_albums
                     and album_track_id in artist_top_tracks_ids
                 ) or not self._get_only_most_played_songs_from_albums:
-                    if(
-                            self._spotify_ignored_tracks
-                            and album_track_id not in self._spotify_ignored_tracks
+                    if (
+                        self._spotify_ignored_tracks
+                        and album_track_id not in self._spotify_ignored_tracks
                     ) or self._spotify_ignored_tracks is None:
                         logging.info("Adding " + q + " to tracks to load")
                         self._tracks_to_load.add(album_track_id)
@@ -172,33 +156,22 @@ class ScrappedPlaylist:
     def _get_artist_track_query(artist, song):
         return 'artist:"' + artist + '" track:"' + song + '"'
 
-    def _get_song(self, artist_name, song_name):
+    def _find_song(self, artist_name, song_name):
         q = self._get_artist_track_query(artist_name, song_name)
 
-        logging.info("Querying: " + q)
+        logging.info("Querying track: " + q)
 
         track = SpotifyTrack(self._spotify_session.search(q=q, type="track", limit=1))
+        return None if track.is_empty() else track
+
+    def _get_song(self, artist_name, song_name):
+        track = self._find_song(artist_name, song_name)
 
         # If not found, try with a corrected misspelling version
-        if track.is_empty() and self._correctors:
+        if not track:
+            track = self._corrector.correct(artist_name, song_name, self._find_song)
 
-            for corrector in self._correctors:
-
-                corrected_values = corrector.correct(artist_name, song_name)
-                if corrected_values is not None:
-                    q = self._get_artist_track_query(
-                        corrected_values["artist"], corrected_values["song"]
-                    )
-
-                    logging.info("Querying corrected: " + q)
-
-                    track = SpotifyTrack(
-                        self._spotify_session.search(q=q, type="track", limit=1)
-                    )
-                    if not track.is_empty():
-                        break
-
-        if not track.is_empty():
+        if track:
 
             if self._check_released_last_year:
                 if not self._is_released_in_last_year(track):
@@ -209,7 +182,7 @@ class ScrappedPlaylist:
                 and track.id not in self._spotify_ignored_tracks
             ) or self._spotify_ignored_tracks is None:
 
-                logging.info("Adding " + q + " to tracks to load")
+                logging.info("Adding " + track.id + " to tracks to load")
                 self._tracks_to_load.add(track.id)
 
     def _get_current_tracks_to_load(self):

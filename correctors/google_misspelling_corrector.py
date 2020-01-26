@@ -1,5 +1,5 @@
 from googleapiclient.discovery import build
-import logging
+
 import settings
 
 SEPARATOR = " : "
@@ -27,7 +27,7 @@ class GoogleMisspellingCorrector:
             corrected = result["spelling"]["correctedQuery"].split(SEPARATOR)
 
             artist_name = corrected[0]
-            track_name = corrected[1]
+            track_name = corrected[1] if len(corrected) == 2 else ""
 
             return {"artist": artist_name, "song": track_name}
         else:
