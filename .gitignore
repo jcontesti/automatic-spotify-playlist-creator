@@ -107,4 +107,4 @@ venv.bak/
 .cache*
 .idea
 tmp/
-misspelling_corrections_log.json
+*.json

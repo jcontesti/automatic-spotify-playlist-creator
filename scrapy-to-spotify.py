@@ -13,7 +13,6 @@ from scrapy.crawler import CrawlerProcess
 import settings
 from scrapped_classes.scrapped_playlist import ScrappedPlaylist
 from scrapped_classes.scrapped_song import ScrappedSong
-from correctors.corrector import Corrector
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
@@ -113,8 +112,8 @@ if __name__ == "__main__":
                 "get_only_most_played_songs_from_albums"
             )
             check_released_last_year = playlist_config.get("check_released_last_year")
-            misspelling_correctors = playlist_config.get("misspelling_correctors")
             artists_transformations = playlist_config.get("artists_transformations")
+            misspelling_correctors = playlist_config.get("misspelling_correctors")
 
             scrapped_playlist = ScrappedPlaylist(
                 spotify_playlist,
@@ -129,7 +128,7 @@ if __name__ == "__main__":
                 get_only_most_played_songs_from_albums,
                 check_released_last_year,
                 artists_transformations,
-                Corrector(misspelling_correctors),
+                misspelling_correctors,
             )
 
             scrapped_playlist.update_playlist()

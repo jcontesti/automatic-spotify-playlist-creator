@@ -1,34 +1,44 @@
 from googleapiclient.discovery import build
+from . import misspelling_corrector
 
 import settings
 
-SEPARATOR = " : "
 
+class GoogleMisspellingCorrector(misspelling_corrector.MisspellingCorrector):
+    GOOGLE_API_KEY = settings.GOOGLE_API_KEY
+    GOOGLE_CSE_KEY = settings.GOOGLE_CSE_KEY
+    SEPARATOR = " : "
 
-class GoogleMisspellingCorrector:
-    @staticmethod
-    def correct(
-        artist_name,
-        track_name,
-        google_api_key=settings.GOOGLE_API_KEY,
-        google_cse_key=settings.GOOGLE_CSE_KEY,
-        **kwargs
-    ):
+    def __init__(self, cache_path="google_misspelling_corrections_cache.json"):
+        super(GoogleMisspellingCorrector, self).__init__(cache_path)
+
+    def correct(self, artist, song):
+
+        # If previously queried, return from cache
+        cached_corrected = self._get_from_cached_misspelling_corrections(artist, song)
+        if cached_corrected:
+            return self._decode_artist_song(cached_corrected)
 
         service = build(
-            "customsearch", "v1", developerKey=google_api_key, cache_discovery=False,
+            "customsearch",
+            "v1",
+            developerKey=self.GOOGLE_API_KEY,
+            cache_discovery=False,
         )
 
-        query = artist_name + SEPARATOR + track_name
+        query = artist + self.SEPARATOR + song
 
-        result = service.cse().list(q=query, cx=google_cse_key, **kwargs).execute()
+        result = service.cse().list(q=query, cx=self.GOOGLE_CSE_KEY).execute()
 
         if "spelling" in result:
-            corrected = result["spelling"]["correctedQuery"].split(SEPARATOR)
+            corrected = result["spelling"]["correctedQuery"].split(self.SEPARATOR)
 
-            artist_name = corrected[0]
-            track_name = corrected[1] if len(corrected) == 2 else ""
+            corrected_artist = corrected[0]
+            corrected_song = corrected[1] if len(corrected) == 2 else ""
 
-            return {"artist": artist_name, "song": track_name}
+            # Cache queried values
+            self._cache_correction(artist, song, corrected_artist, corrected_song)
+
+            return {"artist": corrected_artist, "song": corrected_song}
         else:
             return None

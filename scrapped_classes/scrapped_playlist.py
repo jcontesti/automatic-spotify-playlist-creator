@@ -22,7 +22,7 @@ class ScrappedPlaylist:
         get_only_most_played_songs_from_albums,
         check_released_last_year,
         artists_transformations,
-        corrector,
+        misspelling_correctors,
     ):
         self._spotify_playlist = spotify_playlist
         self._spotify_session = spotify_session
@@ -38,7 +38,24 @@ class ScrappedPlaylist:
         )
         self._check_released_last_year = check_released_last_year
         self._artists_transformations = artists_transformations
-        self._corrector = corrector
+        self._misspelling_correctors = misspelling_correctors
+        self._load_misspelling_correctors()
+
+    def _load_misspelling_correctors(self):
+        self._callable_correctors = []
+
+        if self._misspelling_correctors:
+            for misspelling_corrector in self._misspelling_correctors:
+                misspelling_corrector_module = list(misspelling_corrector.keys())[0]
+                misspelling_corrector_class = misspelling_corrector.get(
+                    misspelling_corrector_module
+                )
+
+                corrector_module = importlib.import_module(misspelling_corrector_module)
+
+                corrector = getattr(corrector_module, misspelling_corrector_class)
+
+                self._callable_correctors.append(corrector())
 
     def _format_scrapped_song(self, scrapped_song):
         # One scrapped song can include many artists and song titles
@@ -156,23 +173,32 @@ class ScrappedPlaylist:
     def _get_artist_track_query(artist, song):
         return 'artist:"' + artist + '" track:"' + song + '"'
 
-    def _find_song(self, artist_name, song_name):
-        q = self._get_artist_track_query(artist_name, song_name)
+    def _find_song(self, artist, song):
+        q = self._get_artist_track_query(artist, song)
 
         logging.info("Querying track: " + q)
 
         track = SpotifyTrack(self._spotify_session.search(q=q, type="track", limit=1))
+
         return None if track.is_empty() else track
 
-    def _get_song(self, artist_name, song_name):
-        track = self._find_song(artist_name, song_name)
+    def _get_song(self, artist, song):
+        track = self._find_song(artist, song)
 
         # If not found, try with a corrected misspelling version
         if not track:
-            track = self._corrector.correct(artist_name, song_name, self._find_song)
+            for corrector in self._callable_correctors:
+                corrected_values = corrector.correct(artist, song)
+
+                if corrected_values is not None:
+                    corrected_artist = corrected_values["artist"]
+                    corrected_song = corrected_values["song"]
+
+                    track = self._find_song(corrected_artist, corrected_song)
+                    if track:
+                        break
 
         if track:
-
             if self._check_released_last_year:
                 if not self._is_released_in_last_year(track):
                     return
