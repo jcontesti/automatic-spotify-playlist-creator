@@ -41,7 +41,6 @@ class Corrector:
         print(self._misspelling_corrections)
 
     def _update_cache_misspelling_corrections(self):
-        Path(self._cache_path).rmdir()
         with open(self._cache_path, "w") as file:
             file.write(json.dumps(self._misspelling_corrections))
 
