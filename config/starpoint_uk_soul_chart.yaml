@@ -35,6 +35,5 @@ misspelling_correctors:
   # Add them as: module name: class name.
   # They will be executed from top to bottom, until one correction is
   # accepted by Spotify
-  - correctors.lastfm_misspelling_corrector: LastFMMisspellingCorrector
   - correctors.google_misspelling_corrector: GoogleMisspellingCorrector
 artists_transformations:
