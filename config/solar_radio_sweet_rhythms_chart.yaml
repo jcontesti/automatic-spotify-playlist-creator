@@ -27,6 +27,8 @@ various_titles_in_one_tokens:
   - 'various tracks'
   - 'various songs'
   - ' etc'
+get_full_albums:
+  True
 get_only_most_played_songs_from_albums:
   True
 check_released_last_year:

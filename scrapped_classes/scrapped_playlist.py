@@ -19,6 +19,7 @@ class ScrappedPlaylist:
         artists_split,
         songs_titles_split,
         various_titles_in_one_tokens,
+        get_full_albums,
         get_only_most_played_songs_from_albums,
         check_released_last_year,
         artists_transformations,
@@ -36,6 +37,7 @@ class ScrappedPlaylist:
         self._get_only_most_played_songs_from_albums = (
             get_only_most_played_songs_from_albums
         )
+        self._get_full_albums = get_full_albums
         self._check_released_last_year = check_released_last_year
         self._artists_transformations = artists_transformations
         self._misspelling_correctors = misspelling_correctors
@@ -162,7 +164,9 @@ class ScrappedPlaylist:
                         self._spotify_ignored_tracks
                         and album_track_id not in self._spotify_ignored_tracks
                     ) or self._spotify_ignored_tracks is None:
-                        logging.info("Adding " + q + " to tracks to load")
+                        logging.info(
+                            "Adding " + q + " " + album_track_id + " to tracks to load"
+                        )
                         self._tracks_to_load.add(album_track_id)
 
     @staticmethod
@@ -211,9 +215,10 @@ class ScrappedPlaylist:
                 logging.info("Adding " + track.id + " to tracks to load")
                 self._tracks_to_load.add(track.id)
 
-    def _get_current_tracks_to_load(self):
+    def _get_new_tracks_to_load(self):
         self._tracks_to_load = set()
 
+        # save result to to self._formatted_songs
         self._format_scrapped_tracks()
 
         for formatted_song in self._formatted_songs:
@@ -223,27 +228,13 @@ class ScrappedPlaylist:
             album = formatted_song.get("album")
 
             for artist_name in artists_names:
-
                 for song_title in songs_titles:
-
-                    if (
-                        self._various_titles_in_one_tokens
-                        and any(
-                            token in song_title
-                            for token in self._various_titles_in_one_tokens
-                        )
-                        and album
-                    ):
-
-                        # Get song without tokens
-                        for token in self._various_titles_in_one_tokens:
-                            song_title = song_title.replace(token, "")
+                    if song_title:
                         self._get_song(artist_name, song_title)
 
-                        # Get songs form the album
-                        self._get_albums_songs(artist_name, album)
-                    else:
-                        self._get_song(artist_name, song_title)
+                if album and self._get_full_albums:
+                    # Get songs from the artist and album
+                    self._get_albums_songs(artist_name, album)
 
     def _get_playlist_current_tracks(self):
         results = self._spotify_session.user_playlist_tracks(
@@ -256,8 +247,8 @@ class ScrappedPlaylist:
 
         return [t["track"]["id"] for t in tracks]
 
-    def _remove_deleted_tracks(self, current_tracks):
-        for current_track in current_tracks:
+    def _remove_deleted_tracks(self, playlist_current_tracks):
+        for current_track in playlist_current_tracks:
             if current_track not in self._tracks_to_load:
                 # Remove the track
                 self._spotify_session.user_playlist_remove_all_occurrences_of_tracks(
@@ -266,14 +257,14 @@ class ScrappedPlaylist:
                     tracks=[current_track],
                 )
 
-    def _add_new_tracks(self, current_tracks):
+    def _add_new_tracks(self, playlist_current_tracks):
 
         # Spotipy API doesn't allow to load more than 100 tracks per call
         SPLIT_MAX = 100
 
         final_tracks_to_append = []
         for track_to_load in self._tracks_to_load:
-            if track_to_load not in current_tracks:  # to avoid duplicates
+            if track_to_load not in playlist_current_tracks:  # to avoid duplicates
                 final_tracks_to_append.append(track_to_load)
 
         if final_tracks_to_append:
@@ -286,12 +277,12 @@ class ScrappedPlaylist:
                 )
 
     def update_playlist(self):
-        self._get_current_tracks_to_load()
+        self._get_new_tracks_to_load()
 
-        current_tracks = self._get_playlist_current_tracks()
+        playlist_current_tracks = self._get_playlist_current_tracks()
 
-        # Remove all current tracks that have gone out of the chart
-        self._remove_deleted_tracks(current_tracks)
+        # Remove all current tracks that have gone out of the playlist
+        self._remove_deleted_tracks(playlist_current_tracks)
 
         # Add all the new tracks that weren't on the playlist
-        self._add_new_tracks(current_tracks)
+        self._add_new_tracks(playlist_current_tracks)
