@@ -105,9 +105,6 @@ if __name__ == "__main__":
             spotify_ignored_tracks = playlist_config.get("spotify_ignored_tracks")
             artists_split = playlist_config.get("artists_split")
             songs_titles_split = playlist_config.get("songs_titles_split")
-            various_titles_in_one_tokens = playlist_config.get(
-                "various_titles_in_one_tokens"
-            )
             get_full_albums = playlist_config.get(
                 "get_full_albums"
             )
@@ -127,7 +124,6 @@ if __name__ == "__main__":
                 spotify_ignored_tracks,
                 artists_split,
                 songs_titles_split,
-                various_titles_in_one_tokens,
                 get_full_albums,
                 get_only_most_played_songs_from_albums,
                 check_released_last_year,

@@ -18,7 +18,6 @@ class ScrappedPlaylist:
         spotify_ignored_tracks,
         artists_split,
         songs_titles_split,
-        various_titles_in_one_tokens,
         get_full_albums,
         get_only_most_played_songs_from_albums,
         check_released_last_year,
@@ -33,7 +32,6 @@ class ScrappedPlaylist:
         self._spotify_ignored_tracks = spotify_ignored_tracks
         self._artists_split = artists_split
         self._songs_titles_split = songs_titles_split
-        self._various_titles_in_one_tokens = various_titles_in_one_tokens
         self._get_only_most_played_songs_from_albums = (
             get_only_most_played_songs_from_albums
         )
@@ -60,12 +58,13 @@ class ScrappedPlaylist:
                 self._callable_correctors.append(corrector())
 
     def _format_scrapped_song(self, scrapped_song):
-        # One scrapped song can include many artists and song titles
+        # One scrapped song can include many artists and song titles, but one album
 
         artist = scrapped_song.artist.lower()
         song_title = scrapped_song.title.lower()
         album_title = scrapped_song.album.lower()
 
+        # Split artists names into a list
         for split in self._artists_split:
             artist = artist.replace(split, "#")
 
@@ -74,6 +73,7 @@ class ScrappedPlaylist:
         else:
             artists_names = [artist]
 
+        # Split songs titles into a list
         for split in self._songs_titles_split:
             song_title = song_title.replace(split, "#")
 
@@ -88,6 +88,8 @@ class ScrappedPlaylist:
             album_title.strip(" \t\n\r") if album_title is not None else album_title
         )
 
+        # Correct artists names using the correspondences found in the variable
+        # _artists_transformations
         artists_names_transformed = []
         for artist_name in artists_names:
             if self._artists_transformations and self._artists_transformations[0].get(
