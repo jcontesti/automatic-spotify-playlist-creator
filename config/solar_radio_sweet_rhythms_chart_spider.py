@@ -18,8 +18,8 @@ class SolarRadioSweetRhythmsChartSpider(scrapy.Spider):
         chart = response.xpath('//div[@class="myplaylist-playlist-entires"]/table//tr')
 
         for item in chart[1:]:
-            artist = item.xpath("td[3]//text()").extract_first()
-            title = item.xpath("td[4]//text()").extract_first()
+            artist = item.xpath("td[3]//text()").extract_first() or ""
+            title = item.xpath("td[4]//text()").extract_first() or ""
             album = item.xpath("td[5]//text()").extract_first() or ""
             label = item.xpath("td[6]//text()").extract_first() or ""
 
