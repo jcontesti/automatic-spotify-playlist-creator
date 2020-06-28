@@ -10,6 +10,3 @@ SPOTIFY_SCOPE = os.environ.get("SPOTIFY_SCOPE")
 
 GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")
 GOOGLE_CSE_KEY = os.environ.get("GOOGLE_CSE_KEY")
-
-LASTFM_API_KEY = os.environ.get("LASTFM_API_KEY")
-LASTFM_SECRET = os.environ.get("LASTFM_SECRET")
