@@ -8,7 +8,8 @@ class MisspellingCorrector(ABC):
     CACHE_SEPARATOR = "@@@"
 
     def __init__(
-        self, cache_path,
+        self,
+        cache_path: str,
     ):
         self._cache_path = cache_path
         self._load_cached_misspelling_corrections()
@@ -24,20 +25,24 @@ class MisspellingCorrector(ABC):
         with open(self._cache_path, "w") as file:
             file.write(json.dumps(self._misspelling_corrections))
 
-    def _encode_artist_song(self, artist, song):
+    def _encode_artist_song(self, artist: str, song: str):
         return artist + self.CACHE_SEPARATOR + song
 
-    def _decode_artist_song(self, artist_song):
+    def _decode_artist_song(self, artist_song: str):
         split = artist_song.split(self.CACHE_SEPARATOR)
         return {"artist": split[0], "song": split[1]}
 
-    def _cache_correction(self, artist, song, corrected_artist, corrected_song):
+    def _cache_correction(self,
+                          artist: str,
+                          song: str,
+                          corrected_artist: str,
+                          corrected_song: str):
         key = self._encode_artist_song(artist, song)
         value = self._encode_artist_song(corrected_artist, corrected_song)
         self._misspelling_corrections[key] = value
         self._update_cached_misspelling_corrections()
 
-    def _get_from_cached_misspelling_corrections(self, artist, song):
+    def _get_from_cached_misspelling_corrections(self, artist: str, song: str):
         key = self._encode_artist_song(artist, song)
         return (
             self._misspelling_corrections[key]
@@ -46,5 +51,5 @@ class MisspellingCorrector(ABC):
         )
 
     @abstractmethod
-    def correct(self, artist, song):
+    def correct(self, artist: str, song: str):
         pass

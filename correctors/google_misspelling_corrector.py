@@ -9,10 +9,10 @@ class GoogleMisspellingCorrector(misspelling_corrector.MisspellingCorrector):
     GOOGLE_CSE_KEY = settings.GOOGLE_CSE_KEY
     SEPARATOR = " : "
 
-    def __init__(self, cache_path="google_misspelling_corrections_cache.json"):
+    def __init__(self, cache_path: str = "google_misspelling_corrections_cache.json"):
         super(GoogleMisspellingCorrector, self).__init__(cache_path)
 
-    def correct(self, artist, song):
+    def correct(self, artist: str, song: str):
 
         # If previously queried, return from cache
         cached_corrected = self._get_from_cached_misspelling_corrections(artist, song)
