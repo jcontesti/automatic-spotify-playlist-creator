@@ -1,3 +1,5 @@
+import spotipy
+
 from . import spotify_artist
 
 
@@ -23,7 +25,7 @@ class SpotifyAlbum:
     def release_date_precision(self) -> str:
         return self._album["release_date_precision"]
 
-    def tracks_ids(self, sp) -> [str]:
+    def songs(self, sp: spotipy.Spotify) -> [str]:
         return [t["id"] for t in sp.album_tracks(self.id)["items"]]
 
     def is_empty(self) -> bool:

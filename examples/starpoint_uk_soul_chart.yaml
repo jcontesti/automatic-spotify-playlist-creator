@@ -1,28 +1,10 @@
 name:
   Starpoint UK Soul Chart
-spider_module:
-  config.starpoint_uk_soul_chart_spider
-spider_class:
-  StarpointUKSoulChartSpider
-spotify_playlist:
+extractor:
+  - module_name: examples.starpoint_uk_soul_chart_spider
+    class_name: StarpointUKSoulChartSpider
+spotify_playlist_destination:
   spotify:user:m9wnok64hlpbzmrqpdmhmmz28:playlist:6VstDi64INlbVb9N9iZ6fZ
-spotify_ignored_tracks:
-spotify_country:
-  GB
-artists_split:
-  - ' & '
-  - ' ft '
-  - ' ft. '
-  - ' feat '
-  - ' feat. '
-  - ' presents '
-  - ' pres. '
-  - ' with '
-  - ' and '
-  -  ', '
-songs_titles_split:
-  - '/'
-  - ' - '
 get_full_albums:
   True
 get_only_most_played_songs_from_albums:

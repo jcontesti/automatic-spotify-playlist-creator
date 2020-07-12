@@ -4,7 +4,7 @@ setup(
     name='scrapy-to-spotify',
     version='',
     packages=[''],
-    package_dir={'': 'spotify_classes'},
+    package_dir={'': 'spotify'},
     url='',
     license='MIT',
     author='Jordi Contestí',

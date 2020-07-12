@@ -1,12 +1,13 @@
 name:
-  Solar Radio Soul Energy House Chart
+  Solar Radio Sweet Rhythms Chart
 spider_module:
-  config.solar_radio_soul_energy_house_chart_spider
+  examples.solar_radio_sweet_rhythms_chart_spider
 spider_class:
-  SolarRadioSoulEnergyHouseChartSpider
+  SolarRadioSweetRhythmsChartSpider
 spotify_playlist:
-  spotify:user:m9wnok64hlpbzmrqpdmhmmz28:playlist:3UPbnmjETswMV57hdI4Bjm
+  spotify:user:m9wnok64hlpbzmrqpdmhmmz28:playlist:1jdWpPBFTkxvtk935zXEWu
 spotify_ignored_tracks:
+  - 7pDgsRaydwphT8FlnlzMZd
 spotify_country:
   GB
 artists_split:
@@ -19,13 +20,13 @@ artists_split:
   - ' pres. '
   - ' with '
   - ' and '
-  -  ', '
+  - ', '
 songs_titles_split:
   - '/'
 get_full_albums:
   True
 get_only_most_played_songs_from_albums:
-  True
+  False
 check_released_last_year:
   True
 misspelling_correctors:
@@ -34,3 +35,11 @@ misspelling_correctors:
   # accepted by Spotify
   - correctors.google_misspelling_corrector: GoogleMisspellingCorrector
 artists_transformations:
+  - '480 east': 'four80east'
+  - 'agape soul': 'darryl anders agapesoul'
+  - 'christian grey': 'christon gray'
+  - 'cornell carter': 'cornell c.c. carter'
+  - 'hil st soul': 'hil st. soul'
+  - 'india arie': 'india.arie'
+  - 'o''jays': 'the ojays'
+  - 'vivian sessions': 'vivian sessoms'
