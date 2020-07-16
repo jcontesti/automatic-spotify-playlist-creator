@@ -80,7 +80,7 @@ class ExtractedSong:
         self._album_title = self._album_title.lower().strip(" \t\n\r")
         self._label = self._label.lower().strip(" \t\n\r")
 
-    def get_copy(self, artist: str, title: str) -> ExtractedSong:
+    def get_copy(self, artist: str, title: str) -> 'ExtractedSong':
         return ExtractedSong(
             artist,
             title,
