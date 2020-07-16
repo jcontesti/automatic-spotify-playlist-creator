@@ -1,45 +1,11 @@
 name:
-  Solar Radio Sweet Rhythms Chart
-spider_module:
-  examples.solar_radio_sweet_rhythms_chart_spider
-spider_class:
-  SolarRadioSweetRhythmsChartSpider
-spotify_playlist:
+  Starpoint UK Soul Chart
+extractor:
+  - module_name: examples.solar_radio_sweet_rhythms_chart_spider
+    class_name: SolarRadioSweetRhythmsChartSpider
+spotify_destination_playlist:
   spotify:user:m9wnok64hlpbzmrqpdmhmmz28:playlist:1jdWpPBFTkxvtk935zXEWu
-spotify_ignored_tracks:
-  - 7pDgsRaydwphT8FlnlzMZd
-spotify_country:
-  GB
-artists_split:
-  - ' & '
-  - ' ft '
-  - ' ft. '
-  - ' feat '
-  - ' feat. '
-  - ' presents '
-  - ' pres. '
-  - ' with '
-  - ' and '
-  - ', '
-songs_titles_split:
-  - '/'
-get_full_albums:
+only_load_songs_released_in_last_year:
   True
-get_only_most_played_songs_from_albums:
-  False
-check_released_last_year:
+load_all_songs_from_albums:
   True
-misspelling_correctors:
-  # Add them as: module name: class name.
-  # They will be executed from top to bottom, until one correction is
-  # accepted by Spotify
-  - correctors.google_misspelling_corrector: GoogleMisspellingCorrector
-artists_transformations:
-  - '480 east': 'four80east'
-  - 'agape soul': 'darryl anders agapesoul'
-  - 'christian grey': 'christon gray'
-  - 'cornell carter': 'cornell c.c. carter'
-  - 'hil st soul': 'hil st. soul'
-  - 'india arie': 'india.arie'
-  - 'o''jays': 'the ojays'
-  - 'vivian sessions': 'vivian sessoms'

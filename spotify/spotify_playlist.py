@@ -28,10 +28,27 @@ class SpotifyPlaylist:
 
         return [SpotifySong(song) for song in songs]
 
-    def add_new_songs(
+    def _remove_current_songs_not_in_songs_to_load(
             self,
             songs_to_load: [str],
     ):
+        playlist_current_songs = self._get_current_songs()
+
+        for current_song in playlist_current_songs:
+            if current_song not in songs_to_load:
+                # Remove the song
+                self._session.user_playlist_remove_all_occurrences_of_tracks(
+                    self._username,
+                    playlist_id=self._id,
+                    tracks=[current_song],
+                )
+
+    def update(
+            self,
+            songs_to_load: [str],
+    ):
+        self._remove_current_songs_not_in_songs_to_load(songs_to_load)
+
         playlist_current_songs = self._get_current_songs()
 
         final_songs_to_append = []
@@ -46,19 +63,4 @@ class SpotifyPlaylist:
                     self._username,
                     playlist_id=self._id,
                     tracks=final_songs_to_append[i: i + self.SPLIT_MAX],
-                )
-
-    def remove_deleted_songs(
-            self,
-            songs_to_load: [str],
-    ):
-        playlist_current_songs = self._get_current_songs()
-
-        for current_song in playlist_current_songs:
-            if current_song not in songs_to_load:
-                # Remove the song
-                self._session.user_playlist_remove_all_occurrences_of_tracks(
-                    self._username,
-                    playlist_id=self._id,
-                    tracks=[current_song],
                 )

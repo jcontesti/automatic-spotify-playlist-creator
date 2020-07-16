@@ -1,6 +1,4 @@
 from . import spotify_album
-from datetime import datetime
-from dateutil.relativedelta import relativedelta
 
 
 class SpotifySong:
@@ -18,21 +16,5 @@ class SpotifySong:
     def is_empty(self) -> bool:
         return not self._song["tracks"]["items"]
 
-    def _extract_released_date(self):
-        release_date = self._song.album.release_date
-        release_date_precision = self._song.album.release_date_precision
-        release_date_formatted = datetime.today()
-
-        if release_date_precision == "year":
-            release_date_formatted = datetime.strptime(release_date, "%Y")
-        if release_date_precision == "month":
-            release_date_formatted = datetime.strptime(release_date, "%Y-%m")
-        if release_date_precision == "day":
-            release_date_formatted = datetime.strptime(release_date, "%Y-%m-%d")
-
-        return release_date_formatted
-
-    def is_released_in_last_year(self):
-        return self._extract_released_date() > datetime.now() - relativedelta(
-            years=1
-        )
+    def is_released_in_last_year(self) -> bool:
+        return self.album.is_released_in_last_year()

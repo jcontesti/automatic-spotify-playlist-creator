@@ -16,18 +16,18 @@ class StarpointUKSoulChartSpider(scrapy.Spider):
         for item in chart:
 
             artist = item.xpath("b//text()").extract_first()
-            title = item.xpath("span//text()").extract_first()
+            song_title = item.xpath("span//text()").extract_first()
 
             song = dict()
             song["artist"] = artist
-            song["title"] = (
+            song["song_title"] = (
                 title.replace(self.ALBUM_INDICATOR, "") + self.VARIOUS_TRACKS
-                if self.ALBUM_INDICATOR in title
-                else title
+                if self.ALBUM_INDICATOR in song_title
+                else song_title
             )
-            song["album"] = (
-                title.replace(self.ALBUM_INDICATOR, "")
-                if self.ALBUM_INDICATOR in title
+            song["album_title"] = (
+                song_title.replace(self.ALBUM_INDICATOR, "")
+                if self.ALBUM_INDICATOR in song_title
                 else ""
             )
             song["label"] = ""

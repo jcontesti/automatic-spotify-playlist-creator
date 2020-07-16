@@ -20,12 +20,12 @@ class ExtractedSong:
 
     def __init__(self,
                  artist: str,
-                 title: str,
-                 album: str = "",
+                 song_title: str,
+                 album_title: str = "",
                  label: str = ""):
         self._artist = artist
-        self._title = title
-        self._album = album
+        self._song_title = song_title
+        self._album_title = album_title
         self._label = label
 
     @property
@@ -33,12 +33,12 @@ class ExtractedSong:
         return self._artist
 
     @property
-    def title(self) -> str:
-        return self._title
+    def song_title(self) -> str:
+        return self._song_title
 
     @property
-    def album(self) -> str:
-        return self._album
+    def album_title(self) -> str:
+        return self._album_title
 
     @property
     def label(self) -> str:
@@ -63,27 +63,27 @@ class ExtractedSong:
         # Split songs titles into a list
         # For instance "Song 1 / Song 2" returns ["Song 1", "Song 2"]
 
-        replaced_titles = None
+        replaced_song_titles = None
         for split in self.TITLES_SEPARATORS:
-            replaced_titles = self._title.replace(split, "#")
+            replaced_song_titles = self._song_title.replace(split, "#")
 
-        if "#" in replaced_titles:
-            separated_titles = replaced_titles.split("#")
+        if "#" in replaced_song_titles:
+            separated_song_titles = replaced_song_titles.split("#")
         else:
-            separated_titles = [replaced_titles]
+            separated_song_titles = [replaced_song_titles]
 
-        return separated_titles
+        return separated_song_titles
 
     def format(self):
         self._artist = self._artist.lower().strip(" \t\n\r")
-        self._title = self._title.lower().strip(" \t\n\r")
-        self._album = self._album.lower().strip(" \t\n\r")
+        self._song_title = self._song_title.lower().strip(" \t\n\r")
+        self._album_title = self._album_title.lower().strip(" \t\n\r")
         self._label = self._label.lower().strip(" \t\n\r")
 
     def get_copy(self, artist: str, title: str) -> ExtractedSong:
         return ExtractedSong(
             artist,
             title,
-            self._album,
+            self._album_title,
             self._label
         )

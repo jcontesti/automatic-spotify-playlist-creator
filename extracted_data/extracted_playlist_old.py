@@ -55,46 +55,11 @@ class ExtractedPlaylistOld:
         # moved to SpotifySong
 
     def _get_albums_songs(self, artist_name, album):
-        q = self._get_artist_album_query(artist_name, album)
-
-        logging.info("Querying album: " + q)
-
-        album = SpotifyAlbum(self._spotify_session.search(q=q, type="album", limit=1))
-
-        if not album.is_empty():
-            artist = album.main_artist
-
-            album_songs = album.songs(self._spotify_session)
-
-            artist_top_songs = []
-            if self._get_only_most_played_songs_from_albums:
-                # We will try to collect the most interesting songs
-                # of the album. Spotify doesn't allow to know the
-                # number of plays per album, but we'll use
-                # a work-around: if any song is included in the most
-                # played songs of the artist, we'll add it
-                # to the playlist
-                artist_top_songs = artist.top_songs(
-                    self._spotify_session, self._spotify_country
-                )
-
-            for album_song in album_songs:
-                if (
-                    self._get_only_most_played_songs_from_albums
-                    and album_song in artist_top_songs
-                ) or not self._get_only_most_played_songs_from_albums:
-                    if (
-                        self._spotify_ignored_songs
-                        and album_song not in self._spotify_ignored_songs
-                    ) or self._spotify_ignored_songs is None:
-                        logging.info(
-                            "Adding " + q + " " + album_song + " to songs to load"
-                        )
-                        self._songs_to_load.add(album_song)
+        # moved to spotify_session
 
     @staticmethod
     def _get_artist_album_query(artist, album):
-        return 'artist:"' + artist + '" album:"' + album + '"'
+        # moved to spotify_session
 
     @staticmethod
     def _get_artist_song_query(artist, song):
