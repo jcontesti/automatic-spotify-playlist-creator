@@ -1,5 +1,5 @@
 from . import spotify_album
-
+import spotipy
 
 class SpotifySong:
     def __init__(self, song: [str]):
@@ -18,3 +18,10 @@ class SpotifySong:
 
     def is_released_in_last_year(self) -> bool:
         return self.album.is_released_in_last_year()
+
+    @staticmethod
+    def get_song_from_id(
+            sp: spotipy.Spotify,
+            song_id: str,
+    ) -> 'SpotifySong':
+        return SpotifySong(sp.track(song_id))

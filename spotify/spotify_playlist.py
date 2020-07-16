@@ -1,8 +1,9 @@
 import spotipy
-from spotify.spotify_song import SpotifySong
+from . import spotify_song
 
 
 class SpotifyPlaylist:
+
     # Spotipy API doesn't allow to load more than 100 songs per call
     SPLIT_MAX = 100
 
@@ -16,7 +17,7 @@ class SpotifyPlaylist:
         self._session = session
         self._username = username
 
-    def _get_current_songs(self) -> [SpotifySong]:
+    def _get_current_songs(self) -> [spotify_song.SpotifySong]:
         results = self._session.user_playlist_tracks(
             self._username,
             playlist_id=self._id
@@ -26,7 +27,7 @@ class SpotifyPlaylist:
             results = self._session.next(results)
             songs.extend(results["items"])
 
-        return [SpotifySong(song) for song in songs]
+        return [spotify_song.SpotifySong(song) for song in songs]
 
     def _remove_current_songs_not_in_songs_to_load(
             self,

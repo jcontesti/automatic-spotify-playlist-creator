@@ -9,7 +9,7 @@ class SpotifyArtist:
     def id(self) -> str:
         return self._artist["id"]
 
-    def top_songs(self, sp: spotipy.Spotify) -> [str]:
+    def top_songs_ids(self, sp: spotipy.Spotify) -> [str]:
         return [
             t["id"] for t in sp.artist_top_tracks(self.id)["tracks"]
         ]

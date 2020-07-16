@@ -1,7 +1,6 @@
 import spotipy
 
-from spotify.spotify_artist import SpotifyArtist
-from spotify.spotify_song import SpotifySong
+from . import spotify_artist
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
@@ -15,8 +14,8 @@ class SpotifyAlbum:
         return self._album["albums"]["items"][0]["id"]
 
     @property
-    def main_artist(self) -> SpotifyArtist:
-        return SpotifyArtist(
+    def main_artist(self) -> spotify_artist.SpotifyArtist:
+        return spotify_artist.SpotifyArtist(
             self._album["albums"]["items"][0]["artists"][0]
         )
 
@@ -45,8 +44,8 @@ class SpotifyAlbum:
             years=1
         )
 
-    def songs(self, sp: spotipy.Spotify) -> [SpotifySong]:
-        return [SpotifySong(song) for song in sp.album_tracks(self.id)["items"]]
+    def songs_ids(self, sp: spotipy.Spotify) -> [str]:
+        return [song["id"] for song in sp.album_tracks(self.id)["items"]]
 
     def is_empty(self) -> bool:
         return not self._album["albums"]["items"]

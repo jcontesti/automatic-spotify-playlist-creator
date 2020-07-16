@@ -5,9 +5,9 @@ import settings
 from correctors.google_misspelling_corrector import GoogleMisspellingCorrector
 from extracted_data.extracted_playlist import ExtractedPlaylist
 from extracted_data.extracted_song import ExtractedSong
-from spotify.spotify_album import SpotifyAlbum
-from spotify.spotify_playlist import SpotifyPlaylist
-from spotify.spotify_song import SpotifySong
+from .spotify_album import SpotifyAlbum
+from . import spotify_song
+from . import spotify_playlist
 
 
 class SpotifySession:
@@ -35,10 +35,10 @@ class SpotifySession:
             self,
             artist: str,
             song_title: str
-    ) -> SpotifySong:
+    ) -> spotify_song.SpotifySong:
         q: str = 'artist:"' + artist + '" song:"' + song_title + '"'
 
-        song = SpotifySong(self._session.search(q=q, type="song", limit=1))
+        song = spotify_song.SpotifySong(self._session.search(q=q, type="song", limit=1))
 
         return None if song.is_empty() else song
 
@@ -46,7 +46,7 @@ class SpotifySession:
             self,
             extracted_song: ExtractedSong,
             only_load_songs_released_in_last_year: bool = False,
-    ) -> SpotifySong:
+    ) -> spotify_song.SpotifySong:
 
         artist = extracted_song.artist
         song_title = extracted_song.song_title
@@ -78,27 +78,27 @@ class SpotifySession:
 
         q: str = 'artist:"' + artist + '" album:"' + album_title + '"'
 
-        spotify_album = SpotifyAlbum(self._session.search(q=q, type="album", limit=1))
-
-        return spotify_album
+        return SpotifyAlbum(self._session.search(q=q, type="album", limit=1))
 
     def _get_all_songs_from_album(
             self,
             extracted_song: ExtractedSong,
             only_load_songs_released_in_last_year: bool = False,
-    ) -> [SpotifySong]:
+    ) -> [spotify_song.SpotifySong]:
         artist = extracted_song.artist
         album_title = extracted_song.album_title
 
         spotify_album = self._find_album(artist, album_title)
 
-        songs_in_spotify_album: [SpotifySong] = []
+        songs_in_spotify_album: [spotify_song.SpotifySong] = []
 
         if not spotify_album.is_empty():
             if only_load_songs_released_in_last_year and not spotify_album.is_released_in_last_year():
                 return None
 
             album_songs = spotify_album.songs(self._session)
+            [spotify_song.SpotifySong(song) for song in
+             sp.album_tracks(spotify_album.id)["items"]]
 
             for album_song in album_songs:
                 songs_in_spotify_album.append(album_song)
@@ -112,13 +112,13 @@ class SpotifySession:
             only_load_songs_released_in_last_year: bool = False,
             load_all_songs_from_albums: bool = False
     ):
-        spotify_playlist = SpotifyPlaylist(
+        playlist = spotify_playlist.SpotifyPlaylist(
             spotify_playlist_destination,
             self._session,
             self._username,
         )
 
-        songs_to_load: [SpotifySong] = []
+        songs_to_load: [spotify_song.SpotifySong] = []
 
         for extracted_song in extracted_playlist.get_songs():
             # Get song in Spotify
@@ -135,4 +135,4 @@ class SpotifySession:
                 songs_to_load = songs_to_load + spotify_album_songs
 
         # Add extracted songs to Spotify playlist
-        spotify_playlist.update(songs_to_load)
+        playlist.update(songs_to_load)
