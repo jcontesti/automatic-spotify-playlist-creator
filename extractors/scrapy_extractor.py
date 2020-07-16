@@ -1,4 +1,3 @@
-import importlib
 import json
 import shutil
 
@@ -16,15 +15,18 @@ class ScrapyExtractor(Extractor):
     SPIDER_FILE = "%(name)s.json"
 
     def __init__(
-        self,
+            self,
+            module_name: str,
+            class_name: str,
+            module: str,
+            extractor: callable,
     ):
-        self._spiders = None
+        self._module_name = module_name
+        self._class_name = class_name
+        self._module = module
+        self._extractor = extractor
 
-    def add_extractor(self, module_name: str, class_name: str):
-        spider_module = importlib.import_module(module_name)
-        self._spiders.append(getattr(spider_module, class_name))
-
-    def execute_extractors(self):
+    def _execute(self):
         try:
             shutil.rmtree(self.SPIDER_DIR)
         except OSError:
@@ -37,28 +39,27 @@ class ScrapyExtractor(Extractor):
                 "FEED_URI": self.SPIDER_DIR + self.SPIDER_FILE,
             }
         )
-
-        for spider in self._spiders:
-            process.crawl(spider)
-
+        process.crawl(self._extractor)
         process.start()
 
-    def get_results(self, class_name: str) -> ExtractedPlaylist:
-        with open(self.SPIDER_DIR + class_name + ".json") as f:
+    def extract_playlist(self) -> ExtractedPlaylist:
+        self._execute()
+
+        with open(self.SPIDER_DIR + self._class_name + ".json") as f:
             results = json.load(f)
 
         extracted_playlist = ExtractedPlaylist()
         for result in results:
             artist = result["artist"]
-            title = result["title"]
-            album = result["album"]
+            song_title = result["song_title"]
+            song_album = result["album_title"]
             label = result["label"]
 
             extracted_playlist.add_extracted_song(
                 ExtractedSong(
                     artist,
-                    title,
-                    album,
+                    song_title,
+                    song_album,
                     label)
             )
 

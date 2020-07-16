@@ -8,17 +8,12 @@ class ExtractionConfiguration:
         yaml_configuration: [str],
     ):
         self._yaml_configuration = yaml_configuration
-        self._extractor = self._load_extractor()
-
-    def _load_extractor(self) -> Extractor:
-        module_name = self._yaml_configuration.get("extractor").get("module_name")
-        class_name = self._yaml_configuration.get("extractor").get("class_name")
-
-        spider_module = importlib.import_module(module_name)
-        return getattr(spider_module, class_name)
 
     def get_field(self, key: str):
         return self._yaml_configuration.get(key)
 
-    def get_extractor(self):
-        return self._extractor
+    def get_extractor_module_name(self):
+        return self._yaml_configuration.get("extractor")[0].get("module_name")
+
+    def get_extractor_class_name(self):
+        return self._yaml_configuration.get("extractor")[0].get("class_name")

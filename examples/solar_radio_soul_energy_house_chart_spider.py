@@ -1,8 +1,9 @@
 import scrapy
 from scrapy.http import TextResponse
+from extractors.scrapy_extractor import ScrapyExtractor
 
 
-class SolarRadioSoulEnergyHouseChartSpider(scrapy.Spider):
+class SolarRadioSoulEnergyHouseChartSpider(scrapy.Spider, ScrapyExtractor):
     name = "SolarRadioSoulEnergyHouseChartSpider"
     start_urls = [
         "http://www.solarradio.com/show/soul-energy-house-chart/",

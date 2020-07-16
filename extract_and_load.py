@@ -4,6 +4,7 @@ import sys
 from extraction_configuration.extraction_configuration_loader \
     import ExtractionConfigurationLoader
 from spotify.spotify_session import SpotifySession
+from extractors.extractor_factory import ExtractorFactory
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
@@ -23,8 +24,16 @@ if __name__ == "__main__":
 
         session = SpotifySession()
 
-        # Extract all songs to load from source
-        extracted_playlist = configuration_files.get_extractor().get_results()
+        # Extract all songs
+        module_name = configuration_file.get_extractor_module_name()
+        class_name = configuration_file.get_extractor_class_name()
+        extractor = ExtractorFactory.get_extractor(module_name, class_name)
+
+        print(extractor)
+
+        extracted_playlist = extractor.extract_playlist()
+
+        # Clean extracted songs
         extracted_playlist.clean_playlist()
 
         # Convert extracted songs to a Spotify playlist

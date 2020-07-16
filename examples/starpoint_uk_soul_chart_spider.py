@@ -1,7 +1,8 @@
 import scrapy
+from extractors.scrapy_extractor import ScrapyExtractor
 
 
-class StarpointUKSoulChartSpider(scrapy.Spider):
+class StarpointUKSoulChartSpider(scrapy.Spider, ScrapyExtractor):
     name = "StarpointUKSoulChartSpider"
     start_urls = [
         "http://www.uksoulchart.com/top30/",
