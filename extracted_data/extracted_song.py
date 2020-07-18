@@ -13,7 +13,7 @@ class ExtractedSong:
         ', ',
     ]
 
-    TITLES_SEPARATORS = [
+    SONGS_TITLES_SEPARATORS = [
         '/',
         ' - ',
     ]
@@ -48,9 +48,9 @@ class ExtractedSong:
         # Split artists names into a list
         # For instance "Artist A feat. Artist B" returns ["Artist A", "Artist B"]
 
-        replaced_artists = None
-        for split in self.ARTISTS_SEPARATORS:
-            replaced_artists = self._artist.replace(split, "#")
+        replaced_artists = self._artist
+        for separator in self.ARTISTS_SEPARATORS:
+            replaced_artists = replaced_artists.replace(separator, "#")
 
         if "#" in replaced_artists:
             separated_artists = replaced_artists.split("#")
@@ -63,9 +63,9 @@ class ExtractedSong:
         # Split songs titles into a list
         # For instance "Song 1 / Song 2" returns ["Song 1", "Song 2"]
 
-        replaced_song_titles = None
-        for split in self.TITLES_SEPARATORS:
-            replaced_song_titles = self._song_title.replace(split, "#")
+        replaced_song_titles = self._song_title
+        for separator in self.SONGS_TITLES_SEPARATORS:
+            replaced_song_titles = replaced_song_titles.replace(separator, "#")
 
         if "#" in replaced_song_titles:
             separated_song_titles = replaced_song_titles.split("#")

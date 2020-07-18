@@ -30,6 +30,8 @@ class SpotifySession:
         )
         self._session = spotipy.Spotify(auth=self._token)
         self._misspelling_corrector = GoogleMisspellingCorrector()
+        # @TODO: reactivate misspelling corrector
+        self._misspelling_corrector = False
 
     def _find_song(
             self,
@@ -119,7 +121,8 @@ class SpotifySession:
         songs_to_load: [spotify_song.SpotifySong] = []
 
         for extracted_song in extracted_playlist.get_songs():
-            # Get song in Spotify
+
+            # Load song from Spotify
             spotify_song = self._get_song(extracted_song, only_load_songs_released_in_last_year)
 
             songs_to_load.append(spotify_song)

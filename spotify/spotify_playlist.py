@@ -9,18 +9,18 @@ class SpotifyPlaylist:
 
     def __init__(
             self,
-            id: str,
+            playlist_id: str,
             session: spotipy.Spotify,
             username: str,
     ):
-        self._id = id
+        self._playlist_id = playlist_id
         self._session = session
         self._username = username
 
     def _get_current_songs(self) -> [spotify_song.SpotifySong]:
         results = self._session.user_playlist_tracks(
             self._username,
-            playlist_id=self._id
+            playlist_id=self._playlist_id
         )
         songs = results["items"]
         while results["next"]:  # to get more than 100 songs
@@ -40,8 +40,8 @@ class SpotifyPlaylist:
                 # Remove the song
                 self._session.user_playlist_remove_all_occurrences_of_tracks(
                     self._username,
-                    playlist_id=self._id,
-                    tracks=[current_song],
+                    playlist_id=self._playlist_id,
+                    tracks=[current_song.id],
                 )
 
     def update(
@@ -62,6 +62,6 @@ class SpotifyPlaylist:
             for i in range(0, len(final_songs_to_append), self.SPLIT_MAX):
                 self._session.user_playlist_add_tracks(
                     self._username,
-                    playlist_id=self._id,
+                    playlist_id=self._playlist_id,
                     tracks=final_songs_to_append[i: i + self.SPLIT_MAX],
                 )

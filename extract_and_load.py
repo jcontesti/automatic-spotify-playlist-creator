@@ -28,9 +28,6 @@ if __name__ == "__main__":
         module_name = configuration_file.get_extractor_module_name()
         class_name = configuration_file.get_extractor_class_name()
         extractor = ExtractorFactory.get_extractor(module_name, class_name)
-
-        print(extractor)
-
         extracted_playlist = extractor.extract_playlist()
 
         # Clean extracted songs
