@@ -22,12 +22,13 @@ class SpotifyPlaylist:
             self._username,
             playlist_id=self._playlist_id
         )
+
         songs = results["items"]
         while results["next"]:  # to get more than 100 songs
             results = self._session.next(results)
             songs.extend(results["items"])
 
-        return [spotify_song.SpotifySong(song) for song in songs]
+        return [spotify_song.SpotifySong(self._session, song["track"]["id"]) for song in songs]
 
     def _remove_current_songs_not_in_songs_to_load(
             self,
@@ -46,13 +47,13 @@ class SpotifyPlaylist:
 
     def update(
             self,
-            songs_to_load: [str],
+            songs_to_load: [spotify_song.SpotifySong],
     ):
         self._remove_current_songs_not_in_songs_to_load(songs_to_load)
 
         playlist_current_songs = self._get_current_songs()
 
-        final_songs_to_append = []
+        final_songs_to_append: [spotify_song.SpotifySong] = []
         for song_to_load in songs_to_load:
             if song_to_load not in playlist_current_songs:  # to avoid duplicates
                 final_songs_to_append.append(song_to_load)
@@ -63,5 +64,5 @@ class SpotifyPlaylist:
                 self._session.user_playlist_add_tracks(
                     self._username,
                     playlist_id=self._playlist_id,
-                    tracks=final_songs_to_append[i: i + self.SPLIT_MAX],
+                    tracks=[song.id for song in final_songs_to_append[i: i + self.SPLIT_MAX]],
                 )

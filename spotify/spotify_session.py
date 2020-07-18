@@ -40,9 +40,13 @@ class SpotifySession:
     ) -> spotify_song.SpotifySong:
         q: str = 'artist:"' + artist + '" track:"' + song_title + '"'
 
-        song = spotify_song.SpotifySong(self._session.search(q=q, type="track", limit=1))
+        search_result = self._session.search(q=q, type="track", limit=1)
 
-        return None if song.is_empty() else song
+        if search_result["tracks"]["total"] > 0:
+            return spotify_song.SpotifySong(self._session,
+                                            search_result["tracks"]["items"][0]["id"])
+        else:
+            return None
 
     def _get_song(
             self,
@@ -80,7 +84,13 @@ class SpotifySession:
 
         q: str = 'artist:"' + artist + '" album:"' + album_title + '"'
 
-        return SpotifyAlbum(self._session.search(q=q, type="album", limit=1))
+        search_result = self._session.search(q=q, type="album", limit=1)
+
+        if search_result["albums"]["total"] > 0:
+            return SpotifyAlbum(self._session,
+                                search_result["albums"]["items"][0]["id"])
+        else:
+            return None
 
     def _get_all_songs_from_album(
             self,
@@ -90,18 +100,21 @@ class SpotifySession:
         artist = extracted_song.artist
         album_title = extracted_song.album_title
 
-        spotify_album = self._find_album(artist, album_title)
-
         songs_in_spotify_album: [spotify_song.SpotifySong] = []
 
-        if not spotify_album.is_empty():
-            if only_load_songs_released_in_last_year and not spotify_album.is_released_in_last_year():
-                return None
+        if album_title:
+            spotify_album = self._find_album(artist, album_title)
 
-            album_songs = spotify_album.songs_ids(self._session)
-            
-            for album_song in album_songs:
-                songs_in_spotify_album.append(album_song)
+            if spotify_album:
+                if only_load_songs_released_in_last_year and not spotify_album.is_released_in_last_year():
+                    return []
+
+                album_songs_ids = spotify_album.songs_ids()
+
+                for album_song_id in album_songs_ids:
+                    songs_in_spotify_album.append(
+                        spotify_song.SpotifySong(self._session, album_song_id)
+                    )
 
         return songs_in_spotify_album
 
@@ -123,9 +136,10 @@ class SpotifySession:
         for extracted_song in extracted_playlist.get_songs():
 
             # Load song from Spotify
-            spotify_song = self._get_song(extracted_song, only_load_songs_released_in_last_year)
+            song = self._get_song(extracted_song, only_load_songs_released_in_last_year)
 
-            songs_to_load.append(spotify_song)
+            if song:
+                songs_to_load.append(song)
 
             if load_all_songs_from_albums:
                 spotify_album_songs = self._get_all_songs_from_album(

@@ -1,29 +1,27 @@
 import spotipy
 
-from . import spotify_artist
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
 
 class SpotifyAlbum:
-    def __init__(self, album: [str]):
-        self._album = album
+    def __init__(self, session: spotipy.Spotify, album_id: str):
+
+        source = session.album(album_id)
+        self._id: str = source["id"]
+        self._release_date: str = source["release_date"]
+        self._release_date_precision: str = source["release_date_precision"]
+        self._session = session
 
     @property
     def id(self) -> str:
-        return self._album["albums"]["items"][0]["id"]
-
-    @property
-    def main_artist(self) -> spotify_artist.SpotifyArtist:
-        return spotify_artist.SpotifyArtist(
-            self._album["albums"]["items"][0]["artists"][0]
-        )
+        return self._id
 
     def _release_date(self) -> str:
-        return self._album["release_date"]
+        return self._release_date
 
     def _release_date_precision(self) -> str:
-        return self._album["release_date_precision"]
+        return self._release_date_precision
 
     def _extract_released_date(self) -> datetime:
         release_date = self._release_date
@@ -44,8 +42,5 @@ class SpotifyAlbum:
             years=1
         )
 
-    def songs_ids(self, sp: spotipy.Spotify) -> [str]:
-        return [song["id"] for song in sp.album_tracks(self.id)["items"]]
-
-    def is_empty(self) -> bool:
-        return not self._album["albums"]["items"]
+    def songs_ids(self) -> [str]:
+        return [song["id"] for song in self._session.album_tracks(self._id)["items"]]
