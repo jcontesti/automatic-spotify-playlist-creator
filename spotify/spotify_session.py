@@ -36,9 +36,9 @@ class SpotifySession:
             artist: str,
             song_title: str
     ) -> spotify_song.SpotifySong:
-        q: str = 'artist:"' + artist + '" song:"' + song_title + '"'
+        q: str = 'artist:"' + artist + '" track:"' + song_title + '"'
 
-        song = spotify_song.SpotifySong(self._session.search(q=q, type="song", limit=1))
+        song = spotify_song.SpotifySong(self._session.search(q=q, type="track", limit=1))
 
         return None if song.is_empty() else song
 
@@ -96,10 +96,8 @@ class SpotifySession:
             if only_load_songs_released_in_last_year and not spotify_album.is_released_in_last_year():
                 return None
 
-            album_songs = spotify_album.songs(self._session)
-            [spotify_song.SpotifySong(song) for song in
-             sp.album_tracks(spotify_album.id)["items"]]
-
+            album_songs = spotify_album.songs_ids(self._session)
+            
             for album_song in album_songs:
                 songs_in_spotify_album.append(album_song)
 
