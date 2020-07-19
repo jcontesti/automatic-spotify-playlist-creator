@@ -1,5 +1,6 @@
 import spotipy
 from . import spotify_song
+from typing import List, Set
 
 
 class SpotifyPlaylist:
@@ -17,7 +18,7 @@ class SpotifyPlaylist:
         self._session = session
         self._username = username
 
-    def _get_current_songs(self) -> [spotify_song.SpotifySong]:
+    def _get_current_songs(self) -> List[spotify_song.SpotifySong]:
         results = self._session.user_playlist_tracks(
             self._username,
             playlist_id=self._playlist_id
@@ -32,7 +33,7 @@ class SpotifyPlaylist:
 
     def _remove_current_songs_not_in_songs_to_load(
             self,
-            songs_to_load: [str],
+            songs_to_load: Set[spotify_song.SpotifySong],
     ):
         playlist_current_songs = self._get_current_songs()
 
@@ -47,22 +48,23 @@ class SpotifyPlaylist:
 
     def update(
             self,
-            songs_to_load: [spotify_song.SpotifySong],
+            songs_to_load: Set[spotify_song.SpotifySong],
     ):
         self._remove_current_songs_not_in_songs_to_load(songs_to_load)
 
         playlist_current_songs = self._get_current_songs()
 
-        final_songs_to_append: [spotify_song.SpotifySong] = []
+        final_songs_to_load: [spotify_song.SpotifySong] = []
+
         for song_to_load in songs_to_load:
             if song_to_load not in playlist_current_songs:  # to avoid duplicates
-                final_songs_to_append.append(song_to_load)
+                final_songs_to_load.append(song_to_load)
 
-        if final_songs_to_append:
+        if final_songs_to_load:
             # Add all the songs in one call in chunks of SPLIT_MAX
-            for i in range(0, len(final_songs_to_append), self.SPLIT_MAX):
+            for i in range(0, len(final_songs_to_load), self.SPLIT_MAX):
                 self._session.user_playlist_add_tracks(
                     self._username,
                     playlist_id=self._playlist_id,
-                    tracks=[song.id for song in final_songs_to_append[i: i + self.SPLIT_MAX]],
+                    tracks=[song.id for song in final_songs_to_load[i: i + self.SPLIT_MAX]],
                 )

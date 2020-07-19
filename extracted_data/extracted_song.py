@@ -1,3 +1,6 @@
+from typing import List
+
+
 class ExtractedSong:
 
     ARTISTS_SEPARATORS = [
@@ -44,7 +47,7 @@ class ExtractedSong:
     def label(self) -> str:
         return self._label
 
-    def get_separated_artists(self) -> [str]:
+    def get_separated_artists(self) -> List[str]:
         # Split artists names into a list
         # For instance "Artist A feat. Artist B" returns ["Artist A", "Artist B"]
 
@@ -59,7 +62,7 @@ class ExtractedSong:
 
         return separated_artists
 
-    def get_separated_titles(self) -> [str]:
+    def get_separated_titles(self) -> List[str]:
         # Split songs titles into a list
         # For instance "Song 1 / Song 2" returns ["Song 1", "Song 2"]
 
