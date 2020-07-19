@@ -27,8 +27,11 @@ if __name__ == "__main__":
     load_all_songs_from_albums = configuration_file.get_field(
         "load_all_songs_from_albums"
     ) or False
+    misspelling_corrector = configuration_file.get_field(
+        "misspelling_corrector"
+    ) or None
 
-    session = SpotifySession()
+    session = SpotifySession(misspelling_corrector=misspelling_corrector)
 
     # Extract all songs
     module_name = configuration_file.get_extractor_module_name()

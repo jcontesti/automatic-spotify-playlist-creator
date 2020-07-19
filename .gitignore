@@ -103,7 +103,7 @@ venv.bak/
 # mypy
 .mypy_cache/
 
-# scrapy-to-spotify
+# additional ignore configuration
 .cache*
 .idea
 tmp/

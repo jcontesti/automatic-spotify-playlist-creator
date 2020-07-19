@@ -21,6 +21,7 @@ class SpotifySession:
             client_id: [str] = settings.SPOTIPY_CLIENT_ID,
             client_secret: [str] = settings.SPOTIPY_CLIENT_SECRET,
             redirect_uri: [str] = settings.SPOTIPY_REDIRECT_URI,
+            misspelling_corrector: str = None,
     ):
         self._username = username
         self._token = util.prompt_for_user_token(
@@ -32,8 +33,9 @@ class SpotifySession:
         )
         self._session = spotipy.Spotify(auth=self._token)
         self._misspelling_corrector = GoogleMisspellingCorrector()
-        # @TODO: reactivate misspelling corrector
-        self._misspelling_corrector = False
+
+        if misspelling_corrector == 'Google':
+            self._misspelling_corrector = GoogleMisspellingCorrector()
 
     def _find_song(
             self,

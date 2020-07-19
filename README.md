@@ -1,4 +1,4 @@
-# Scrapy to Spotify
-Python application that allows to update a playlist in Spotify from songs
-titles, artists, albums and labels extracted with Scrapy (https://scrapy.org)
-from any web page.
+# Automatic Spotify Playlist Creator
+Python application that allows to fill and update a playlist in Spotify from songs
+titles, artists, albums and labels extracted
+from any web page or file.
