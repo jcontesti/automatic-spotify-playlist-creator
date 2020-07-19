@@ -19,7 +19,7 @@ httplib2==0.18.0
 hyperlink==18.0.0
 idna==2.8
 incremental==17.5.0
-lxml==4.2.5
+lxml==4.5.2
 parsel==1.5.1
 pathspec==0.7.0
 pyasn1==0.4.4
@@ -46,4 +46,4 @@ typed-ast==1.4.0
 uritemplate==3.0.0
 urllib3==1.24.2
 w3lib==1.19.0
-zope.interface==4.6.0
+zope.interface==5.0.0
