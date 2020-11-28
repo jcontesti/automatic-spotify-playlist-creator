@@ -15,6 +15,5 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      # Runs a single command using the runners shell
       - name: mypy check
         uses: jpetrucciani/mypy-check@master
