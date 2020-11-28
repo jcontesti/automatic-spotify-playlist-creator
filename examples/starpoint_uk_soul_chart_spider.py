@@ -8,7 +8,24 @@ class StarpointUKSoulChartSpider(scrapy.Spider, ScrapyExtractor):
         "http://www.uksoulchart.com/top30/",
     ]
 
-    ALBUM_INDICATOR = " album"
+    ALBUM_INDICATORS = [" album", "/Album", "/album"]
+
+    def _remove_album_indicator(self, song_title: str) -> str:
+        song_title_wo_album_indicator = song_title
+        for album_indicator in self.ALBUM_INDICATORS:
+            song_title_wo_album_indicator = (
+                song_title_wo_album_indicator.replace(album_indicator, "")
+            )
+
+        return song_title_wo_album_indicator
+
+    def _extract_album(self, song_title: str) -> str:
+        album = song_title
+        for album_indicator in self.ALBUM_INDICATORS:
+            album = album.replace(album_indicator, "")
+
+        # return empty string any album indicator has been found in the song title
+        return album if album != song_title else ""
 
     def parse(self, response):
         chart = response.xpath('//table[@id="tchart"]//tr/td[@class="artist"]')
@@ -20,12 +37,8 @@ class StarpointUKSoulChartSpider(scrapy.Spider, ScrapyExtractor):
 
             song = dict()
             song["artist"] = artist
-            song["song_title"] = song_title.replace(self.ALBUM_INDICATOR, "")
-            song["album_title"] = (
-                song_title.replace(self.ALBUM_INDICATOR, "")
-                if self.ALBUM_INDICATOR in song_title
-                else ""
-            )
+            song["song_title"] = self._remove_album_indicator(song_title)
+            song["album_title"] = self._extract_album(song_title)
             song["label"] = ""
 
             yield song
