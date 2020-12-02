@@ -10,32 +10,35 @@ from extracted_data.extracted_song import ExtractedSong
 from . import spotify_playlist
 from . import spotify_song
 from .spotify_album import SpotifyAlbum
-
+from typing import Any, Dict
+from correctors.misspelling_corrector import MisspellingCorrector
 
 class SpotifySession:
 
     def __init__(
             self,
-            username: [str] = settings.SPOTIFY_USERNAME,
-            scope: [str] = settings.SPOTIFY_SCOPE,
-            client_id: [str] = settings.SPOTIPY_CLIENT_ID,
-            client_secret: [str] = settings.SPOTIPY_CLIENT_SECRET,
-            redirect_uri: [str] = settings.SPOTIPY_REDIRECT_URI,
-            misspelling_corrector: str = None,
-    ):
-        self._username = username
-        self._token = util.prompt_for_user_token(
+            username: Optional[str] = settings.SPOTIFY_USERNAME,
+            scope: Optional[str] = settings.SPOTIFY_SCOPE,
+            client_id: Optional[str] = settings.SPOTIPY_CLIENT_ID,
+            client_secret: Optional[str] = settings.SPOTIPY_CLIENT_SECRET,
+            redirect_uri: Optional[str] = settings.SPOTIPY_REDIRECT_URI,
+            misspelling_corrector: Optional[str] = None,
+    ) -> None:
+        self._username: str = username or ""
+        self._token: Any = util.prompt_for_user_token(
             username=username,
             scope=scope,
             client_id=client_id,
             client_secret=client_secret,
             redirect_uri=redirect_uri,
         )
-        self._session = spotipy.Spotify(auth=self._token)
-        self._misspelling_corrector = GoogleMisspellingCorrector()
+        self._session: spotipy.Spotify = spotipy.Spotify(auth=self._token)
 
+        self._misspelling_corrector: Optional[MisspellingCorrector] = None
         if misspelling_corrector == 'Google':
-            self._misspelling_corrector = GoogleMisspellingCorrector()
+            self._misspelling_corrector = (
+                GoogleMisspellingCorrector()
+            )
 
     def _find_song(
             self,
@@ -44,7 +47,7 @@ class SpotifySession:
     ) -> Optional[spotify_song.SpotifySong]:
         q: str = 'artist:"' + artist + '" track:"' + song_title + '"'
 
-        search_result = self._session.search(q=q, type="track", limit=1)
+        search_result: Dict[str, Any] = self._session.search(q=q, type="track", limit=1)
 
         if search_result["tracks"]["total"] > 0:
             return spotify_song.SpotifySong(self._session,
@@ -58,10 +61,10 @@ class SpotifySession:
             only_load_songs_released_in_last_year: bool = False,
     ) -> Optional[spotify_song.SpotifySong]:
 
-        artist = extracted_song.artist
-        song_title = extracted_song.song_title
+        artist: str = extracted_song.artist
+        song_title: str = extracted_song.song_title
 
-        song = self._find_song(artist, song_title)
+        song: Optional[spotify_song.SpotifySong] = self._find_song(artist, song_title)
 
         # If not found, try with a corrected version
         if not song:
@@ -76,7 +79,9 @@ class SpotifySession:
                     song = self._find_song(corrected_artist, corrected_song)
 
         if song:
-            if only_load_songs_released_in_last_year and not song.is_released_in_last_year():
+            if only_load_songs_released_in_last_year and (
+                    not song.is_released_in_last_year()
+            ):
                 return None
 
         return song
@@ -129,7 +134,7 @@ class SpotifySession:
             extracted_playlist: ExtractedPlaylist,
             only_load_songs_released_in_last_year: bool = False,
             load_all_songs_from_albums: bool = False
-    ):
+    ) -> None:
         playlist = spotify_playlist.SpotifyPlaylist(
             spotify_playlist_destination,
             self._session,
@@ -141,15 +146,20 @@ class SpotifySession:
         for extracted_song in extracted_playlist.get_songs():
 
             # Load song from Spotify
-            song = self._get_song(extracted_song, only_load_songs_released_in_last_year)
+            song: Optional[spotify_song.SpotifySong] = self._get_song(
+                extracted_song,
+                only_load_songs_released_in_last_year
+            )
 
             if song:
                 songs_to_load.add(song)
 
             if load_all_songs_from_albums:
-                spotify_album_songs = self._get_all_songs_from_album(
-                    extracted_song,
-                    only_load_songs_released_in_last_year
+                spotify_album_songs: Set[spotify_song.SpotifySong] = (
+                    self._get_all_songs_from_album(
+                        extracted_song,
+                        only_load_songs_released_in_last_year
+                    )
                 )
 
                 songs_to_load = songs_to_load.union(spotify_album_songs)

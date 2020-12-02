@@ -1,6 +1,6 @@
 from googleapiclient.discovery import build
 from . import misspelling_corrector
-
+from typing import Dict, Optional
 import settings
 
 
@@ -12,7 +12,7 @@ class GoogleMisspellingCorrector(misspelling_corrector.MisspellingCorrector):
     def __init__(self, cache_path: str = "google_misspelling_corrections_cache.json"):
         super(GoogleMisspellingCorrector, self).__init__(cache_path)
 
-    def correct(self, artist: str, song: str):
+    def correct(self, artist: str, song: str) -> Optional[Dict[str, str]]:
 
         # If previously queried, return from cache
         cached_corrected = self._get_from_cached_misspelling_corrections(artist, song)

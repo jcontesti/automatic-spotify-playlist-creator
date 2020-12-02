@@ -1,8 +1,13 @@
 import scrapy
+from scrapy.http import TextResponse
 from extractors.scrapy_extractor import ScrapyExtractor
+from typing import Dict, Generator
 
 
-class StarpointUKSoulChartSpider(scrapy.Spider, ScrapyExtractor):
+class StarpointUKSoulChartSpider(
+    scrapy.Spider,  # type: ignore
+    ScrapyExtractor
+):
     name = "StarpointUKSoulChartSpider"
     start_urls = [
         "http://www.uksoulchart.com/top30/",
@@ -11,7 +16,7 @@ class StarpointUKSoulChartSpider(scrapy.Spider, ScrapyExtractor):
     ALBUM_INDICATORS = [" album", "/Album", "/album"]
 
     def _remove_album_indicator(self, song_title: str) -> str:
-        song_title_wo_album_indicator = song_title
+        song_title_wo_album_indicator: str = song_title
         for album_indicator in self.ALBUM_INDICATORS:
             song_title_wo_album_indicator = (
                 song_title_wo_album_indicator.replace(album_indicator, "")
@@ -20,14 +25,14 @@ class StarpointUKSoulChartSpider(scrapy.Spider, ScrapyExtractor):
         return song_title_wo_album_indicator
 
     def _extract_album(self, song_title: str) -> str:
-        album = song_title
+        album: str = song_title
         for album_indicator in self.ALBUM_INDICATORS:
             album = album.replace(album_indicator, "")
 
         # return empty string any album indicator has been found in the song title
         return album if album != song_title else ""
 
-    def parse(self, response):
+    def parse(self, response: TextResponse) -> Generator[Dict[str, str], None, None]:
         chart = response.xpath('//table[@id="tchart"]//tr/td[@class="artist"]')
 
         for item in chart:

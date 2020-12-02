@@ -2,26 +2,18 @@ import spotipy
 
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
+from typing import Dict, List
 
 
 class SpotifyAlbum:
-    def __init__(self, session: spotipy.Spotify, album_id: str):
 
-        source = session.album(album_id)
+    def __init__(self, session: spotipy.Spotify, album_id: str) -> None:
+        source: Dict[str, str] = session.album(album_id)
+
         self._id: str = source["id"]
-        self._release_date: str = source["release_date"]
+        self._release_date: str = str(source["release_date"])
         self._release_date_precision: str = source["release_date_precision"]
         self._session = session
-
-    @property
-    def id(self) -> str:
-        return self._id
-
-    def _release_date(self) -> str:
-        return self._release_date
-
-    def _release_date_precision(self) -> str:
-        return self._release_date_precision
 
     def _extract_released_date(self) -> datetime:
         release_date = self._release_date
@@ -42,5 +34,5 @@ class SpotifyAlbum:
             years=1
         )
 
-    def songs_ids(self) -> [str]:
+    def songs_ids(self) -> List[str]:
         return [song["id"] for song in self._session.album_tracks(self._id)["items"]]

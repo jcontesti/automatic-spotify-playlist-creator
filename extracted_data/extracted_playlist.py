@@ -1,21 +1,22 @@
 from .extracted_song import ExtractedSong
+from typing import List
 
 
 class ExtractedPlaylist:
 
     def __init__(
             self,
-    ):
-        self._extracted_songs = []
+    ) -> None:
+        self._extracted_songs: List[ExtractedSong] = []
 
-    def add_extracted_song(self, extracted_song: ExtractedSong):
+    def add_extracted_song(self, extracted_song: ExtractedSong) -> None:
         self._extracted_songs.append(extracted_song)
 
-    def clean_playlist(self):
+    def clean_playlist(self) -> None:
         # One scrapped song can include many artists and song titles, but one album
         # and one label
 
-        cleaned_extracted_songs = []
+        cleaned_extracted_songs: List[ExtractedSong] = []
 
         for extracted_song in self._extracted_songs:
             separated_artists = extracted_song.get_separated_artists()
@@ -38,5 +39,5 @@ class ExtractedPlaylist:
 
         self._extracted_songs = cleaned_extracted_songs
 
-    def get_songs(self) -> [ExtractedSong]:
+    def get_songs(self) -> List[ExtractedSong]:
         return self._extracted_songs

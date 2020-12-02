@@ -25,7 +25,7 @@ class ExtractedSong:
                  artist: str,
                  song_title: str,
                  album_title: str = "",
-                 label: str = ""):
+                 label: str = "") -> None:
         self._artist = artist
         self._song_title = song_title
         self._album_title = album_title
@@ -77,7 +77,7 @@ class ExtractedSong:
 
         return separated_song_titles
 
-    def format(self):
+    def format(self) -> None:
         self._artist = self._artist.lower().strip(" \t\n\r")
         self._song_title = self._song_title.lower().strip(" \t\n\r")
         self._album_title = self._album_title.lower().strip(" \t\n\r")

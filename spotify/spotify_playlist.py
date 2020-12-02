@@ -34,7 +34,7 @@ class SpotifyPlaylist:
     def _remove_current_songs_not_in_songs_to_load(
             self,
             songs_to_load: Set[spotify_song.SpotifySong],
-    ):
+    ) -> None:
         playlist_current_songs = self._get_current_songs()
 
         for current_song in playlist_current_songs:
@@ -49,12 +49,12 @@ class SpotifyPlaylist:
     def update(
             self,
             songs_to_load: Set[spotify_song.SpotifySong],
-    ):
+    ) -> None:
         self._remove_current_songs_not_in_songs_to_load(songs_to_load)
 
         playlist_current_songs = self._get_current_songs()
 
-        final_songs_to_load: [spotify_song.SpotifySong] = []
+        final_songs_to_load: List[spotify_song.SpotifySong] = []
 
         for song_to_load in songs_to_load:
             if song_to_load not in playlist_current_songs:  # to avoid duplicates

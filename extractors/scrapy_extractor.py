@@ -6,6 +6,8 @@ from scrapy.crawler import CrawlerProcess
 from extracted_data.extracted_playlist import ExtractedPlaylist
 from extracted_data.extracted_song import ExtractedSong
 from extractors.extractor import Extractor
+from typing import Any
+from types import ModuleType
 
 
 class ScrapyExtractor(Extractor):
@@ -18,15 +20,15 @@ class ScrapyExtractor(Extractor):
             self,
             module_name: str,
             class_name: str,
-            module: str,
-            extractor: callable,
-    ):
-        self._module_name = module_name
-        self._class_name = class_name
-        self._module = module
-        self._extractor = extractor
+            module: ModuleType,
+            extractor: Any,
+    ) -> None:
+        self._module_name: str = module_name
+        self._class_name: str = class_name
+        self._module: ModuleType = module
+        self._extractor: Any = extractor
 
-    def _execute(self):
+    def _execute(self) -> None:
         try:
             shutil.rmtree(self.SPIDER_DIR)
         except OSError:
