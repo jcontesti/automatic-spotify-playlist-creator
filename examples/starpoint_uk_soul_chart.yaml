@@ -1,3 +1,4 @@
+---
 name:
   Starpoint UK Soul Chart
 extractor:
@@ -6,8 +7,8 @@ extractor:
 spotify_playlist_destination:
   spotify:user:m9wnok64hlpbzmrqpdmhmmz28:playlist:6VstDi64INlbVb9N9iZ6fZ
 only_load_songs_released_in_last_year:
-  True
+  true
 load_all_songs_from_albums:
-  True
-#misspelling_corrector:
-#  Google
+  true
+misspelling_corrector:
+  Google
