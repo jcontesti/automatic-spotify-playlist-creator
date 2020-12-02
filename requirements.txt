@@ -1,4 +1,6 @@
 bandit==1.6.2
+python-dateutil==2.8.1
+python-dotenv==0.15.0
 google_api_python_client==1.12.8
 mypy==0.790
 pylint==2.6.0
