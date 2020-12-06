@@ -36,7 +36,7 @@ limit-inference-results=100
 
 # List of plugins (as comma separated values of python module names) to load,
 # usually to register additional checkers.
-load-plugins=
+load-plugins=pylint.extensions.mccabe
 
 # Pickle collected data for later comparisons.
 persistent=yes
@@ -506,6 +506,8 @@ max-statements=50
 # Minimum number of public methods for a class (see R0903).
 min-public-methods=2
 
+# Maximum McCabe complexity
+max-complexity=10
 
 [EXCEPTIONS]
 
