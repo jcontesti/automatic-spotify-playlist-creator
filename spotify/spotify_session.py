@@ -1,36 +1,35 @@
-from typing import Set, Optional
+"""Class that represents a session in Spotify."""
+from typing import Any, Dict, Optional, Set
 
 import spotipy
 import spotipy.util as util
 
-import settings
+from settings import Settings
 from correctors.google_misspelling_corrector import GoogleMisspellingCorrector
+from correctors.misspelling_corrector import MisspellingCorrector
 from extracted_data.extracted_playlist import ExtractedPlaylist
 from extracted_data.extracted_song import ExtractedSong
 from . import spotify_playlist
 from . import spotify_song
 from .spotify_album import SpotifyAlbum
-from typing import Any, Dict
-from correctors.misspelling_corrector import MisspellingCorrector
+
 
 class SpotifySession:
+    """Class that represents a session in Spotify."""
 
     def __init__(
             self,
-            username: Optional[str] = settings.SPOTIFY_USERNAME,
-            scope: Optional[str] = settings.SPOTIFY_SCOPE,
-            client_id: Optional[str] = settings.SPOTIPY_CLIENT_ID,
-            client_secret: Optional[str] = settings.SPOTIPY_CLIENT_SECRET,
-            redirect_uri: Optional[str] = settings.SPOTIPY_REDIRECT_URI,
+            settings: Settings,
+            # pylint: disable=unsubscriptable-object
             misspelling_corrector: Optional[str] = None,
     ) -> None:
-        self._username: str = username or ""
+        self._username: str = settings.SPOTIFY_USERNAME
         self._token: Any = util.prompt_for_user_token(
-            username=username,
-            scope=scope,
-            client_id=client_id,
-            client_secret=client_secret,
-            redirect_uri=redirect_uri,
+            username=settings.SPOTIFY_USERNAME,
+            scope=settings.SPOTIFY_SCOPE,
+            client_id=settings.SPOTIPY_CLIENT_ID,
+            client_secret=settings.SPOTIPY_CLIENT_SECRET,
+            redirect_uri=settings.SPOTIPY_REDIRECT_URI,
         )
         self._session: spotipy.Spotify = spotipy.Spotify(auth=self._token)
 
@@ -44,26 +43,34 @@ class SpotifySession:
             self,
             artist: str,
             song_title: str
-    ) -> Optional[spotify_song.SpotifySong]:
-        q: str = 'artist:"' + artist + '" track:"' + song_title + '"'
+    ) -> Optional[spotify_song.SpotifySong]:  # pylint: disable=unsubscriptable-object
+        query: str = 'artist:"' + artist + '" track:"' + song_title + '"'
 
-        search_result: Dict[str, Any] = self._session.search(q=q, type="track", limit=1)
+        search_result: Dict[str, Any] = self._session.search(
+            q=query,
+            type="track",
+            limit=1
+        )
+
+        # pylint: disable=unsubscriptable-object
+        song: Optional[spotify_song.SpotifySong] = None
 
         if search_result["tracks"]["total"] > 0:
-            return spotify_song.SpotifySong(self._session,
+            song = spotify_song.SpotifySong(self._session,
                                             search_result["tracks"]["items"][0]["id"])
-        else:
-            return None
+
+        return song
 
     def _get_song(
             self,
             extracted_song: ExtractedSong,
             only_load_songs_released_in_last_year: bool = False,
-    ) -> Optional[spotify_song.SpotifySong]:
+    ) -> Optional[spotify_song.SpotifySong]:  # pylint: disable=unsubscriptable-object
 
         artist: str = extracted_song.artist
         song_title: str = extracted_song.song_title
 
+        # pylint: disable=unsubscriptable-object
         song: Optional[spotify_song.SpotifySong] = self._find_song(artist, song_title)
 
         # If not found, try with a corrected version
@@ -90,17 +97,24 @@ class SpotifySession:
             self,
             artist: str,
             album_title: str,
-    ) -> Optional[SpotifyAlbum]:
+    ) -> Optional[SpotifyAlbum]:  # pylint: disable=unsubscriptable-object
 
-        q: str = 'artist:"' + artist + '" album:"' + album_title + '"'
+        query: str = 'artist:"' + artist + '" album:"' + album_title + '"'
 
-        search_result = self._session.search(q=q, type="album", limit=1)
+        search_result: Dict[str, Any] = self._session.search(
+            q=query,
+            type="album",
+            limit=1
+        )
+
+        # pylint: disable=unsubscriptable-object
+        album: Optional[SpotifyAlbum] = None
 
         if search_result["albums"]["total"] > 0:
-            return SpotifyAlbum(self._session,
+            album = SpotifyAlbum(self._session,
                                 search_result["albums"]["items"][0]["id"])
-        else:
-            return None
+
+        return album
 
     def _get_all_songs_from_album(
             self,
@@ -116,7 +130,8 @@ class SpotifySession:
             spotify_album = self._find_album(artist, album_title)
 
             if spotify_album:
-                if only_load_songs_released_in_last_year and not spotify_album.is_released_in_last_year():
+                if (only_load_songs_released_in_last_year and
+                        not spotify_album.is_released_in_last_year()):
                     return set()
 
                 album_songs_ids = spotify_album.songs_ids()
@@ -135,6 +150,7 @@ class SpotifySession:
             only_load_songs_released_in_last_year: bool = False,
             load_all_songs_from_albums: bool = False
     ) -> None:
+        """Replace a Spotify playlist with the new extracted songs."""
         playlist = spotify_playlist.SpotifyPlaylist(
             spotify_playlist_destination,
             self._session,
@@ -146,6 +162,7 @@ class SpotifySession:
         for extracted_song in extracted_playlist.get_songs():
 
             # Load song from Spotify
+            # pylint: disable=unsubscriptable-object
             song: Optional[spotify_song.SpotifySong] = self._get_song(
                 extracted_song,
                 only_load_songs_released_in_last_year

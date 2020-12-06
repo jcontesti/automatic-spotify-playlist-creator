@@ -1,10 +1,12 @@
+"""Main file to execute all the process."""
 import logging
 import sys
 from argparse import ArgumentParser
 
-from spotify.spotify_session import SpotifySession
-from extractors.extractor_factory import ExtractorFactory
 from extraction_configuration.extraction_configuration import ExtractionConfiguration
+from extractors.extractor_factory import ExtractorFactory
+from settings import Settings
+from spotify.spotify_session import SpotifySession
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
@@ -31,7 +33,10 @@ if __name__ == "__main__":
         "misspelling_corrector"
     ) or None
 
-    session = SpotifySession(misspelling_corrector=misspelling_corrector)
+    session = SpotifySession(
+        settings=Settings(),
+        misspelling_corrector=misspelling_corrector,
+    )
 
     # Extract all songs
     module_name = configuration_file.get_extractor_module_name()

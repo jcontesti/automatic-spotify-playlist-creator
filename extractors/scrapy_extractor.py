@@ -1,20 +1,23 @@
+"""Extractor class using Scrapy."""
 import json
 import shutil
+from types import ModuleType
+from typing import Any, Final
 
 from scrapy.crawler import CrawlerProcess
 
 from extracted_data.extracted_playlist import ExtractedPlaylist
 from extracted_data.extracted_song import ExtractedSong
 from extractors.extractor import Extractor
-from typing import Any
-from types import ModuleType
 
 
 class ScrapyExtractor(Extractor):
-    SPIDER_USER_AGENT = "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1)"
-    SPIDER_FEED_FORMAT = "json"
-    SPIDER_DIR = "./tmp/"
-    SPIDER_FILE = "%(name)s.json"
+    """Extractor class using Scrapy."""
+
+    SPIDER_USER_AGENT: Final[str] = "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1)"
+    SPIDER_FEED_FORMAT: Final[str] = "json"
+    SPIDER_DIR: Final[str] = "./tmp/"
+    SPIDER_FILE: Final[str] = "%(name)s.json"
 
     def __init__(
             self,
@@ -34,7 +37,7 @@ class ScrapyExtractor(Extractor):
         except OSError:
             pass
 
-        process = CrawlerProcess(
+        process: CrawlerProcess = CrawlerProcess(
             {
                 "USER_AGENT": self.SPIDER_USER_AGENT,
                 "FEED_FORMAT": self.SPIDER_FEED_FORMAT,
@@ -47,15 +50,15 @@ class ScrapyExtractor(Extractor):
     def extract_playlist(self) -> ExtractedPlaylist:
         self._execute()
 
-        with open(self.SPIDER_DIR + self._class_name + ".json") as f:
-            results = json.load(f)
+        with open(self.SPIDER_DIR + self._class_name + ".json") as file:
+            results: Any = json.load(file)
 
-        extracted_playlist = ExtractedPlaylist()
+        extracted_playlist: ExtractedPlaylist = ExtractedPlaylist()
         for result in results:
-            artist = result["artist"]
-            song_title = result["song_title"]
-            song_album = result["album_title"]
-            label = result["label"]
+            artist: str = result["artist"]
+            song_title: str = result["song_title"]
+            song_album: str = result["album_title"]
+            label: str = result["label"]
 
             extracted_playlist.add_extracted_song(
                 ExtractedSong(

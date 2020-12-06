@@ -1,11 +1,13 @@
-import spotipy
-
+"""Class that represents an album in Spotify."""
 from datetime import datetime
-from dateutil.relativedelta import relativedelta
 from typing import Dict, List
+
+import spotipy
+from dateutil.relativedelta import relativedelta
 
 
 class SpotifyAlbum:
+    """Class that represents an album in Spotify."""
 
     def __init__(self, session: spotipy.Spotify, album_id: str) -> None:
         source: Dict[str, str] = session.album(album_id)
@@ -30,9 +32,19 @@ class SpotifyAlbum:
         return release_date_formatted
 
     def is_released_in_last_year(self) -> bool:
+        """
+        Check if the album was released in the last 365 days.
+
+        :return: True if the album was released in the last year, False otherwise.
+        """
         return self._extract_released_date() > datetime.now() - relativedelta(
             years=1
         )
 
     def songs_ids(self) -> List[str]:
+        """
+        Return Spotify ids of all the songs in the album.
+
+        :return: List with ids of all the songs in the album.
+        """
         return [song["id"] for song in self._session.album_tracks(self._id)["items"]]

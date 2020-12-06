@@ -1,13 +1,17 @@
+"""Class to implement Starpoint Radio UK Soul Chart Scrapy spider."""
+from typing import Dict, Generator
+
 import scrapy
 from scrapy.http import TextResponse
+
 from extractors.scrapy_extractor import ScrapyExtractor
-from typing import Dict, Generator
 
 
 class StarpointUKSoulChartSpider(
     scrapy.Spider,  # type: ignore
     ScrapyExtractor
 ):
+    """Class to implement Starpoint Radio UK Soul Chart Scrapy spider."""
     name = "StarpointUKSoulChartSpider"
     start_urls = [
         "http://www.uksoulchart.com/top30/",
