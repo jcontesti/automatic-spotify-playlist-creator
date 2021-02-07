@@ -10,5 +10,5 @@ only_load_songs_released_in_last_year:
   true
 load_all_songs_from_albums:
   true
-#misspelling_corrector:
-#  Google
+misspelling_corrector:
+  Google
