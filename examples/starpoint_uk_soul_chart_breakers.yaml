@@ -1,0 +1,14 @@
+---
+name:
+  Starpoint UK Soul Chart Breakers
+extractor:
+  - module_name: examples.starpoint_uk_soul_chart_breakers_spider
+    class_name: StarpointUKSoulChartBreakersSpider
+spotify_playlist_destination:
+  spotify:user:m9wnok64hlpbzmrqpdmhmmz28:playlist:5zYTB8kNY7iIq7b9xH3pqF
+only_load_songs_released_in_last_year:
+  true
+load_all_songs_from_albums:
+  true
+#misspelling_corrector:
+#  Google
