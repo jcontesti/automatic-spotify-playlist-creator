@@ -31,7 +31,7 @@ class StarpointUKSoulChartBreakersSpider(
 
     @staticmethod
     def _remove_text_between_parentheses(song_title: str) -> str:
-        return re.sub("[\(\[].*?[\)\]]", "", song_title)
+        return re.sub(r"[\(\[].*?[\)\]]", "", song_title)
 
     def _extract_album(self, song_title: str) -> str:
         album: str = song_title
