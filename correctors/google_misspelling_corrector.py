@@ -3,7 +3,7 @@ from typing import Dict, Final, Optional
 
 from googleapiclient.discovery import build
 
-from settings import Settings
+from settings import environment_settings
 from . import misspelling_corrector
 
 
@@ -11,8 +11,8 @@ class GoogleMisspellingCorrector(misspelling_corrector.MisspellingCorrector):
     """
     Class that allows to correct artists and songs titles using Google Search Console.
     """
-    GOOGLE_API_KEY: Final[str] = Settings.GOOGLE_API_KEY
-    GOOGLE_CSE_KEY: Final[str] = Settings.GOOGLE_CSE_KEY
+    GOOGLE_API_KEY: Final[str] = environment_settings.GOOGLE_API_KEY
+    GOOGLE_CSE_KEY: Final[str] = environment_settings.GOOGLE_CSE_KEY
     SEPARATOR: Final[str] = " : "
 
     def __init__(self, cache_path: str = "google_misspelling_corrections_cache.json"):
@@ -29,9 +29,9 @@ class GoogleMisspellingCorrector(misspelling_corrector.MisspellingCorrector):
 
         # Not typed because it returns a generic Resource
         service = build(
-            "customsearch",
-            "v1",
-            developerKey=self.GOOGLE_API_KEY,
+            serviceName="customsearch",
+            version="v1",
+            developerKey=environment_settings.GOOGLE_API_KEY,
             cache_discovery=False,
         )
 

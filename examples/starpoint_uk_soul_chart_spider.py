@@ -53,18 +53,18 @@ class StarpointUKSoulChartSpider(
             song = dict()
             song["artist"] = artist
             song["song_title"] = (
-                self._remove_album_indicator(song_title)
-                if self.REMOVE_TEXT_BETWEEN_PARENTHESES
-                else self._remove_text_between_parentheses(
+                self._remove_text_between_parentheses(
                         self._remove_album_indicator(song_title)
                 )
+                if self.REMOVE_TEXT_BETWEEN_PARENTHESES
+                else self._remove_album_indicator(song_title)
             )
             song["album_title"] = (
-                self._extract_album(song_title)
-                if self.REMOVE_TEXT_BETWEEN_PARENTHESES
-                else self._remove_text_between_parentheses(
+                self._remove_text_between_parentheses(
                     self._extract_album(song_title)
                 )
+                if self.REMOVE_TEXT_BETWEEN_PARENTHESES
+                else self._extract_album(song_title)
             )
             song["label"] = ""
 

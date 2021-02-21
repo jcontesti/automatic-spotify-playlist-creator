@@ -4,7 +4,7 @@ from typing import Any, Dict, Optional, Set
 import spotipy
 import spotipy.util as util
 
-from settings import Settings
+from settings import environment_settings
 from correctors.google_misspelling_corrector import GoogleMisspellingCorrector
 from correctors.misspelling_corrector import MisspellingCorrector
 from extracted_data.extracted_playlist import ExtractedPlaylist
@@ -19,17 +19,16 @@ class SpotifySession:
 
     def __init__(
             self,
-            settings: Settings,
             # pylint: disable=unsubscriptable-object
             misspelling_corrector: Optional[str] = None,
     ) -> None:
-        self._username: str = settings.SPOTIFY_USERNAME
+        self._username: str = environment_settings.SPOTIFY_USERNAME
         self._token: Any = util.prompt_for_user_token(
-            username=settings.SPOTIFY_USERNAME,
-            scope=settings.SPOTIFY_SCOPE,
-            client_id=settings.SPOTIPY_CLIENT_ID,
-            client_secret=settings.SPOTIPY_CLIENT_SECRET,
-            redirect_uri=settings.SPOTIPY_REDIRECT_URI,
+            username=environment_settings.SPOTIFY_USERNAME,
+            scope=environment_settings.SPOTIFY_SCOPE,
+            client_id=environment_settings.SPOTIPY_CLIENT_ID,
+            client_secret=environment_settings.SPOTIPY_CLIENT_SECRET,
+            redirect_uri=environment_settings.SPOTIPY_REDIRECT_URI,
         )
         self._session: spotipy.Spotify = spotipy.Spotify(auth=self._token)
 

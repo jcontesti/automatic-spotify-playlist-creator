@@ -34,7 +34,6 @@ if __name__ == "__main__":
     ) or None
 
     session = SpotifySession(
-        settings=Settings(),
         misspelling_corrector=misspelling_corrector,
     )
 
