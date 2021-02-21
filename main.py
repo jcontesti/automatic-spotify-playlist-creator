@@ -5,7 +5,6 @@ from argparse import ArgumentParser
 
 from extraction_configuration.extraction_configuration import ExtractionConfiguration
 from extractors.extractor_factory import ExtractorFactory
-from settings import Settings
 from spotify.spotify_session import SpotifySession
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
