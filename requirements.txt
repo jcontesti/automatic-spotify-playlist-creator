@@ -4,6 +4,6 @@ python-dotenv==0.15.0
 google_api_python_client==1.12.8
 mypy==0.790
 pylint==2.6.0
-Scrapy==1.5.1
+Scrapy==2.6.1
 spotipy==2.4.4
 yamllint==1.25.0
