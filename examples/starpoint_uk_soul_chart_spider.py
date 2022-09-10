@@ -43,9 +43,7 @@ class StarpointUKSoulChartSpider(
         return re.sub(r"[\(\[].*?[\)\]]", "", text)
 
     def parse(
-            self,
-            response: TextResponse,
-            **kwargs: Optional[Any]
+            self, response: TextResponse, **kwargs: Optional[Any]
     ) -> Generator[Dict[str, str], None, None]:
         chart = response.xpath('//table[@id="tchart"]//tr/td[@class="artist"]')
 

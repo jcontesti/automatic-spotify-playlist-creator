@@ -16,9 +16,7 @@ class SolarRadioChartSpider(
     chart_link_xpath: Optional[str] = None
 
     def parse(
-            self,
-            response: TextResponse,
-            **kwargs: Optional[Any]
+            self, response: TextResponse, **kwargs: Optional[Any]
     ) -> Generator[Dict[str, str], None, None]:
         chart_link = response.xpath(self.chart_link_xpath).extract_first()
         yield response.follow(chart_link, callback=self._parse_playlist)
