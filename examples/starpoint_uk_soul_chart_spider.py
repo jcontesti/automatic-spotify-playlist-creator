@@ -1,5 +1,5 @@
 """Class to implement Starpoint Radio UK Soul Chart Scrapy spider."""
-from typing import Dict, Generator
+from typing import Any, Dict, Generator, Optional
 
 import re
 import scrapy
@@ -42,7 +42,11 @@ class StarpointUKSoulChartSpider(
     def _remove_text_between_parentheses(text: str) -> str:
         return re.sub(r"[\(\[].*?[\)\]]", "", text)
 
-    def parse(self, response: TextResponse) -> Generator[Dict[str, str], None, None]:
+    def parse(
+            self,
+            response: TextResponse,
+            **kwargs: Optional[Any]
+    ) -> Generator[Dict[str, str], None, None]:
         chart = response.xpath('//table[@id="tchart"]//tr/td[@class="artist"]')
 
         for item in chart:

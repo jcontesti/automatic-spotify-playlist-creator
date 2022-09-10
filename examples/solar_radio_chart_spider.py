@@ -1,5 +1,5 @@
 """Base class for any Solar Radio Chart Scrapy spider."""
-from typing import Dict, Generator, Optional
+from typing import Any, Dict, Generator, Optional
 
 import scrapy
 from scrapy.http import TextResponse
@@ -15,7 +15,11 @@ class SolarRadioChartSpider(
 
     chart_link_xpath: Optional[str] = None
 
-    def parse(self, response: TextResponse) -> Generator[Dict[str, str], None, None]:
+    def parse(
+            self,
+            response: TextResponse,
+            **kwargs: Optional[Any]
+    ) -> Generator[Dict[str, str], None, None]:
         chart_link = response.xpath(self.chart_link_xpath).extract_first()
         yield response.follow(chart_link, callback=self._parse_playlist)
 
