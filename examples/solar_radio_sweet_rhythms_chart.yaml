@@ -1,6 +1,6 @@
 ---
 name:
-  Starpoint UK Soul Chart
+  Solar Radio Sweet Rhythms Chart
 extractor:
   - module_name: examples.solar_radio_sweet_rhythms_chart_spider
     class_name: SolarRadioSweetRhythmsChartSpider
