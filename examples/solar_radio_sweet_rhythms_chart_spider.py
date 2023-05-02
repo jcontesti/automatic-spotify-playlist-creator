@@ -1,6 +1,6 @@
 """Class to implement Solar Radio Sweet Rhythms Chart Scrapy spider."""
 
-from typing import List, Optional
+from typing import List
 
 from examples.solar_radio_chart_spider import SolarRadioChartSpider
 
@@ -11,4 +11,3 @@ class SolarRadioSweetRhythmsChartSpider(SolarRadioChartSpider):
     start_urls: List[str] = [
         "http://solarradio.com/sweet-rhythms-chart-2/",
     ]
-
