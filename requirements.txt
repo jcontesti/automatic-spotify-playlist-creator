@@ -6,7 +6,7 @@ google_api_python_client==1.12.8
 mypy==0.971
 pylint==2.6.0
 pyopenssl==22.0.0
-Scrapy==2.6.2
+Scrapy==2.13.4
 spotipy==2.4.4
 twisted==22.10.0
 types-PyYAML==6.0.11
